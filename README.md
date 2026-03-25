@@ -57,15 +57,20 @@ npm install
 
 ### 2. Configure Environment
 
-Copy `.env.example` to `.env` and add your API keys:
+Copy `.env.example` to `.env`:
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` to add:
-- `ANTHROPIC_API_KEY` - for Claude LLM integration
-- `OPENAI_API_KEY` - for OpenAI LLM integration (optional)
+Retrieve the credentials.key file from 1password here:
+https://start.1password.com/open/i?a=QUEOH6L5OVCBHFUW3SD5E4TOLA&v=lyeugzcj6wwqfchm5y72j3c5ga&i=4kihm6mav7ws6gquv4aaj5uigu&h=growthx.1password.com
+
+And write it to the config/credentials.key file:
+
+```bash
+echo "<FILL_ME_OUT>" > config/credentials.key
+```
 
 ### 3. Start Output Services
 
