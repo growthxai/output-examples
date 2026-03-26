@@ -1,7 +1,7 @@
 import { step, z } from '@outputai/core';
 import { generateText, Output } from '@outputai/llm';
 import { fetchCommits, fetchMergedPullRequests } from '../../clients/github.js';
-import { categorizedChangesSchema, changeEntrySchema } from './types.js';
+import { categorizedChangesSchema } from './types.js';
 
 const repoParamsSchema = z.object( {
   owner: z.string(),
@@ -75,11 +75,7 @@ export const categorizeChanges = step( {
         commitsJson: JSON.stringify( commits ),
         pullRequestsJson: JSON.stringify( pullRequests )
       },
-      output: Output.object( {
-        schema: z.object( {
-          entries: z.array( changeEntrySchema )
-        } )
-      } )
+      output: Output.object( { schema: categorizedChangesSchema } )
     } );
 
     return output;
