@@ -10,17 +10,22 @@ export const METHODOLOGY_DIMENSIONS: Record<Methodology, string[]> = {
   SPIN: [ 'Situation', 'Problem', 'Implication', 'Need-Payoff' ]
 };
 
-export const dimensionScoreSchema = z.object( {
-  dimension: z.string().describe( 'Name of the methodology dimension' ),
-  score: z.number().describe( 'Score from 0-10 for this dimension' ),
-  evidence: z.string().describe( 'Key quotes or moments from the transcript supporting this score' ),
-  gap: z.string().optional().describe( 'What was missing or could be improved' ),
-  recommendation: z.string().optional().describe( 'Specific suggestion for the next call' )
-} );
-
 export const workflowInputSchema = z.object( {
   transcript: z.string().describe( 'Full text transcript of the sales call' ),
   methodology: methodologyEnum.describe( 'Sales methodology to evaluate against' )
+} );
+
+export const dimensionResultSchema = z.object( {
+  dimension: z.string().describe( 'Name of the methodology dimension' ),
+  score: z.number().describe( 'Score from 0-10 for this dimension' ),
+  confidence: z.number().describe( 'Confidence in the evaluation 0-1' ),
+  reasoning: z.string().optional().describe( 'Evidence from the transcript supporting the score' ),
+  feedback: z.array( z.object( {
+    issue: z.string(),
+    suggestion: z.string().optional(),
+    reference: z.string().optional(),
+    priority: z.enum( [ 'low', 'medium', 'high', 'critical' ] ).optional()
+  } ) ).optional().describe( 'Gaps and recommendations for this dimension' )
 } );
 
 export const synthesisOutputSchema = z.object( {
@@ -32,10 +37,10 @@ export const synthesisOutputSchema = z.object( {
 export const workflowOutputSchema = z.object( {
   methodology: methodologyEnum,
   overallScore: z.number().describe( 'Overall score 0-100 across all dimensions' ),
-  dimensionScores: z.array( dimensionScoreSchema ),
+  dimensionScores: z.array( dimensionResultSchema )
 } ).merge( synthesisOutputSchema );
 
-export type DimensionScore = z.infer<typeof dimensionScoreSchema>;
+export type DimensionResult = z.infer<typeof dimensionResultSchema>;
 export type SynthesisOutput = z.infer<typeof synthesisOutputSchema>;
 export type WorkflowInput = z.infer<typeof workflowInputSchema>;
 export type WorkflowOutput = z.infer<typeof workflowOutputSchema>;

@@ -1,6 +1,8 @@
 import { workflow } from '@outputai/core';
-import { scoreDimension, synthesizeResults } from './steps.js';
+import { scoreDimension } from './evaluators.js';
+import { synthesizeResults } from './steps.js';
 import { workflowInputSchema, workflowOutputSchema, METHODOLOGY_DIMENSIONS } from './types.js';
+import type { DimensionResult } from './types.js';
 
 export default workflow( {
   name: 'call_scorer',
@@ -10,7 +12,7 @@ export default workflow( {
   fn: async ( input ) => {
     const dimensions = METHODOLOGY_DIMENSIONS[ input.methodology ];
 
-    const dimensionScores = await Promise.all(
+    const evaluations = await Promise.all(
       dimensions.map( ( dimension ) =>
         scoreDimension( {
           transcript: input.transcript,
@@ -20,9 +22,21 @@ export default workflow( {
       )
     );
 
+    const dimensionScores: DimensionResult[] = evaluations.map( ( evaluation, i ) => ( {
+      dimension: evaluation.name ?? dimensions[ i ],
+      score: evaluation.value,
+      confidence: evaluation.confidence,
+      reasoning: evaluation.reasoning,
+      feedback: evaluation.feedback
+    } ) );
+
+    const scoresText = dimensionScores.map( ( d ) =>
+      `### ${d.dimension}: ${d.score}/10\n- Evidence: ${d.reasoning ?? 'N/A'}${d.feedback?.map( f => `\n- Gap: ${f.issue}${f.suggestion ? `\n- Recommendation: ${f.suggestion}` : ''}` ).join( '' ) ?? ''}`
+    ).join( '\n\n' );
+
     const synthesis = await synthesizeResults( {
       methodology: input.methodology,
-      dimensionScores
+      scoresText
     } );
 
     const totalScore = dimensionScores.reduce( ( sum, d ) => sum + d.score, 0 );

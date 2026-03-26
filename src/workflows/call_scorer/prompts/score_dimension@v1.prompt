@@ -22,9 +22,17 @@ Dimension description: {{ dimensionDescription }}
 {{ transcript }}
 
 ## Instructions
-Analyze how well the "{{ dimension }}" dimension was covered in this call. Provide:
-1. A score from 0-10
-2. Specific evidence from the transcript (direct quotes or moments)
-3. Any gaps — what was missing or poorly handled
-4. A concrete recommendation for the next call to improve this dimension
+Analyze how well the "{{ dimension }}" dimension was covered in this call.
+
+Return your evaluation as a structured result with:
+- **value**: A score from 0-10 (integer)
+- **confidence**: Your confidence in the score from 0.0 to 1.0
+- **name**: "{{ dimension }}"
+- **reasoning**: Specific evidence from the transcript (direct quotes or key moments)
+- **feedback**: An array of objects, each with:
+  - **issue**: A gap — what was missing or poorly handled
+  - **suggestion**: A concrete recommendation for the next call
+  - **priority**: "low", "medium", "high", or "critical" based on impact
+
+If no gaps exist, provide an empty feedback array.
 </user>
