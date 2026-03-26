@@ -23,15 +23,19 @@ export const workflowInputSchema = z.object( {
   methodology: methodologyEnum.describe( 'Sales methodology to evaluate against' )
 } );
 
+export const synthesisOutputSchema = z.object( {
+  gaps: z.array( z.string() ).describe( 'Key gaps identified across the call' ),
+  nextCallRecommendations: z.array( z.string() ).describe( 'Priority recommendations for the next call (max 5)' ),
+  summary: z.string().describe( 'Brief overall assessment of the call' )
+} );
+
 export const workflowOutputSchema = z.object( {
   methodology: methodologyEnum,
   overallScore: z.number().describe( 'Overall score 0-100 across all dimensions' ),
   dimensionScores: z.array( dimensionScoreSchema ),
-  gaps: z.array( z.string() ).describe( 'Key gaps identified across the call' ),
-  nextCallRecommendations: z.array( z.string() ).describe( 'Priority recommendations for the next call' ),
-  summary: z.string().describe( 'Brief overall assessment of the call' )
-} );
+} ).merge( synthesisOutputSchema );
 
 export type DimensionScore = z.infer<typeof dimensionScoreSchema>;
+export type SynthesisOutput = z.infer<typeof synthesisOutputSchema>;
 export type WorkflowInput = z.infer<typeof workflowInputSchema>;
 export type WorkflowOutput = z.infer<typeof workflowOutputSchema>;

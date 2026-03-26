@@ -1,7 +1,7 @@
 import { step, z } from '@outputai/core';
 import { generateText, Output } from '@outputai/llm';
-import { dimensionScoreSchema } from './types.js';
-import type { DimensionScore, Methodology } from './types.js';
+import { dimensionScoreSchema, methodologyEnum, synthesisOutputSchema } from './types.js';
+import type { DimensionScore, Methodology, SynthesisOutput } from './types.js';
 
 const DIMENSION_DESCRIPTIONS: Record<string, Record<string, string>> = {
   MEDDIC: {
@@ -31,7 +31,7 @@ export const scoreDimension = step( {
   description: 'Score a single methodology dimension against a call transcript',
   inputSchema: z.object( {
     transcript: z.string(),
-    methodology: z.string(),
+    methodology: methodologyEnum,
     dimension: z.string()
   } ),
   outputSchema: dimensionScoreSchema,
@@ -53,17 +53,11 @@ export const scoreDimension = step( {
   }
 } );
 
-const synthesisOutputSchema = z.object( {
-  gaps: z.array( z.string() ),
-  nextCallRecommendations: z.array( z.string() ),
-  summary: z.string()
-} );
-
 export const synthesizeResults = step( {
   name: 'synthesize_results',
   description: 'Synthesize dimension scores into overall assessment',
   inputSchema: z.object( {
-    methodology: z.string(),
+    methodology: methodologyEnum,
     dimensionScores: z.array( dimensionScoreSchema )
   } ),
   outputSchema: synthesisOutputSchema,
@@ -81,6 +75,6 @@ export const synthesizeResults = step( {
       output: Output.object( { schema: synthesisOutputSchema } )
     } );
 
-    return output as z.infer<typeof synthesisOutputSchema>;
+    return output as SynthesisOutput;
   }
 } );
