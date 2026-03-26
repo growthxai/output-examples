@@ -7,13 +7,15 @@ export const urlContentSchema = z.object( {
   tokenCount: z.number()
 } );
 
+export const faqItemSchema = z.object( {
+  question: z.string(),
+  answer: z.string()
+} );
+
 export const summarySchema = z.object( {
   tldr: z.string().describe( 'A one or two sentence TLDR of the page content' ),
   keyPoints: z.array( z.string() ).describe( 'List of key points extracted from the content' ),
-  faq: z.array( z.object( {
-    question: z.string(),
-    answer: z.string()
-  } ) ).describe( 'FAQ section generated from the content' )
+  faq: z.array( faqItemSchema ).describe( 'FAQ section generated from the content' )
 } );
 
 export const workflowInputSchema = z.object( {
@@ -23,13 +25,7 @@ export const workflowInputSchema = z.object( {
 export const workflowOutputSchema = z.object( {
   url: z.string(),
   title: z.string(),
-  tldr: z.string(),
-  keyPoints: z.array( z.string() ),
-  faq: z.array( z.object( {
-    question: z.string(),
-    answer: z.string()
-  } ) )
-} );
+} ).merge( summarySchema );
 
 export type UrlContent = z.infer<typeof urlContentSchema>;
 export type Summary = z.infer<typeof summarySchema>;
