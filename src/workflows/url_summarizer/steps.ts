@@ -1,14 +1,12 @@
-import { step, z } from '@outputai/core';
+import { step } from '@outputai/core';
 import { generateText, Output } from '@outputai/llm';
 import { fetchBlogContent } from '../../clients/jina.js';
-import { urlContentSchema, summarySchema } from './types.js';
+import { fetchContentInputSchema, urlContentSchema, summarizeContentInputSchema, summarySchema } from './types.js';
 
 export const fetchContent = step( {
   name: 'fetch_url_content',
   description: 'Fetch page content from URL using Jina Reader API',
-  inputSchema: z.object( {
-    url: z.string().url()
-  } ),
+  inputSchema: fetchContentInputSchema,
   outputSchema: urlContentSchema,
   fn: async ( { url } ) => {
     const response = await fetchBlogContent( url );
@@ -24,10 +22,7 @@ export const fetchContent = step( {
 export const summarizeContent = step( {
   name: 'summarize_content',
   description: 'Generate structured summary with key points, FAQ, and TLDR',
-  inputSchema: z.object( {
-    title: z.string(),
-    content: z.string()
-  } ),
+  inputSchema: summarizeContentInputSchema,
   outputSchema: summarySchema,
   fn: async ( { title, content } ) => {
     const { output } = await generateText( {

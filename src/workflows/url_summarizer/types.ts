@@ -18,6 +18,15 @@ export const summarySchema = z.object( {
   faq: z.array( faqItemSchema ).describe( 'FAQ section generated from the content' )
 } );
 
+export const fetchContentInputSchema = z.object( {
+  url: z.string().url()
+} );
+
+export const summarizeContentInputSchema = z.object( {
+  title: z.string(),
+  content: z.string()
+} );
+
 export const workflowInputSchema = z.object( {
   url: z.string().url().describe( 'URL of the page to summarize' )
 } );
