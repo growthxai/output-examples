@@ -1,0 +1,24 @@
+---
+provider: anthropic
+model: claude-haiku-4-5
+temperature: 0.3
+maxTokens: 4096
+---
+
+<system>
+You are an expert content summarizer. Given a web page's title and content, produce a structured summary that captures the essential information clearly and concisely.
+</system>
+
+<user>
+Summarize the following web page content.
+
+Title: {{ title }}
+
+Content:
+{{ content }}
+
+Produce:
+1. A TLDR (one or two sentences capturing the core message)
+2. Key points (a list of the most important takeaways)
+3. An FAQ section (3-5 questions and answers that a reader would likely ask after reading this content)
+</user>
