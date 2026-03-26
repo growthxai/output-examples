@@ -31,6 +31,11 @@ export const scrapedContentSchema = z.object( {
   tokenCount: z.number()
 } );
 
+export const fetchContentInputSchema = z.object( {
+  url: z.string().url().describe( 'URL of the recipe page to fetch' )
+} );
+
+export type FetchContentInput = z.infer<typeof fetchContentInputSchema>;
 export type WorkflowInput = z.infer<typeof workflowInputSchema>;
 export type WorkflowOutput = z.infer<typeof workflowOutputSchema>;
 export type Ingredient = z.infer<typeof ingredientSchema>;

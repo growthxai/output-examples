@@ -1,15 +1,13 @@
-import { step, z } from '@outputai/core';
+import { step } from '@outputai/core';
 import { generateText, Output } from '@outputai/llm';
 import { fetchBlogContent } from '../../clients/jina.js';
-import { scrapedContentSchema, recipeSchema } from './types.js';
+import { fetchContentInputSchema, scrapedContentSchema, recipeSchema } from './types.js';
 import type { ScrapedContent, Recipe } from './types.js';
 
 export const fetchContent = step( {
   name: 'fetch_recipe_page',
   description: 'Fetch recipe page content from URL using Jina Reader API',
-  inputSchema: z.object( {
-    url: z.string().url()
-  } ),
+  inputSchema: fetchContentInputSchema,
   outputSchema: scrapedContentSchema,
   fn: async ( { url } ) => {
     const response = await fetchBlogContent( url );
