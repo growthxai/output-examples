@@ -10,6 +10,17 @@ export const METHODOLOGY_DIMENSIONS: Record<Methodology, string[]> = {
   SPIN: [ 'Situation', 'Problem', 'Implication', 'Need-Payoff' ]
 };
 
+export const scoreDimensionInputSchema = z.object( {
+  transcript: z.string(),
+  methodology: methodologyEnum,
+  dimension: z.string()
+} );
+
+export const synthesizeResultsInputSchema = z.object( {
+  methodology: methodologyEnum,
+  scoresText: z.string()
+} );
+
 export const workflowInputSchema = z.object( {
   transcript: z.string().describe( 'Full text transcript of the sales call' ),
   methodology: methodologyEnum.describe( 'Sales methodology to evaluate against' )

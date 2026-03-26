@@ -1,7 +1,7 @@
-import { evaluator, z, EvaluationNumberResult } from '@outputai/core';
+import { evaluator, EvaluationNumberResult } from '@outputai/core';
 import type { EvaluationResultArgs } from '@outputai/core';
 import { generateText, Output } from '@outputai/llm';
-import { methodologyEnum } from './types.js';
+import { scoreDimensionInputSchema } from './types.js';
 
 const DIMENSION_DESCRIPTIONS: Record<string, Record<string, string>> = {
   MEDDIC: {
@@ -29,11 +29,7 @@ const DIMENSION_DESCRIPTIONS: Record<string, Record<string, string>> = {
 export const scoreDimension = evaluator( {
   name: 'score_dimension',
   description: 'Score a single methodology dimension against a call transcript',
-  inputSchema: z.object( {
-    transcript: z.string(),
-    methodology: methodologyEnum,
-    dimension: z.string()
-  } ),
+  inputSchema: scoreDimensionInputSchema,
   fn: async ( { transcript, methodology, dimension } ) => {
     const dimensionDescription = DIMENSION_DESCRIPTIONS[ methodology ]?.[ dimension ] ?? '';
 
