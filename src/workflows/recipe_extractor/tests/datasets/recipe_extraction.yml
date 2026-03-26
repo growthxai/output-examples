@@ -1,0 +1,11 @@
+name: recipe_extraction
+input:
+  url: "https://sallysbakingaddiction.com/chocolate-chip-cookies/"
+ground_truth:
+  evals:
+    has_title:
+      min_length: 3
+    has_ingredients:
+      min_count: 5
+    has_instructions:
+      min_count: 3

@@ -1,43 +1,29 @@
 import { z } from '@outputai/core';
 
 export const workflowInputSchema = z.object( {
-  url: z.string().url().describe( 'URL of the recipe blog post to extract from' )
-} );
-
-export const ingredientSchema = z.object( {
-  name: z.string().describe( 'Ingredient name' ),
-  quantity: z.string().describe( 'Amount needed' ),
-  unit: z.string().optional().describe( 'Unit of measurement' ),
-  notes: z.string().optional().describe( 'Preparation notes (e.g., "chopped", "room temperature")' )
+  url: z.string().url().describe( 'The URL of a blog post containing a recipe' )
 } );
 
 export const recipeSchema = z.object( {
-  title: z.string().describe( 'Recipe title' ),
-  description: z.string().optional().describe( 'Brief recipe description' ),
-  prepTime: z.string().optional().describe( 'Preparation time' ),
-  cookTime: z.string().optional().describe( 'Cook time' ),
-  totalTime: z.string().optional().describe( 'Total time' ),
-  servings: z.string().optional().describe( 'Number of servings' ),
-  ingredients: z.array( ingredientSchema ).describe( 'List of ingredients with measurements' ),
-  instructions: z.array( z.string() ).describe( 'Step-by-step cooking instructions' )
+  title: z.string().describe( 'The recipe title' ),
+  description: z.string().optional().describe( 'A brief 1-2 sentence description' ),
+  prepTime: z.string().optional().describe( 'Preparation time, e.g. "15 minutes"' ),
+  cookTime: z.string().optional().describe( 'Cooking time, e.g. "30 minutes"' ),
+  totalTime: z.string().optional().describe( 'Total time, e.g. "45 minutes"' ),
+  servings: z.string().optional().describe( 'Number of servings, e.g. "4 servings"' ),
+  ingredients: z.array( z.object( {
+    quantity: z.string().optional().describe( 'Amount, e.g. "1/2"' ),
+    unit: z.string().optional().describe( 'Unit of measurement, e.g. "cup"' ),
+    item: z.string().describe( 'The ingredient name' ),
+    notes: z.string().optional().describe( 'Preparation notes, e.g. "diced", "melted"' )
+  } ) ).describe( 'List of ingredients' ),
+  instructions: z.array( z.string() ).describe( 'Step-by-step instructions' )
 } );
 
-export const workflowOutputSchema = recipeSchema;
-
-export const scrapedContentSchema = z.object( {
-  title: z.string(),
-  url: z.string(),
-  content: z.string(),
-  tokenCount: z.number()
+export const workflowOutputSchema = z.object( {
+  recipe: recipeSchema
 } );
 
-export const fetchContentInputSchema = z.object( {
-  url: z.string().url().describe( 'URL of the recipe page to fetch' )
-} );
-
-export type FetchContentInput = z.infer<typeof fetchContentInputSchema>;
 export type WorkflowInput = z.infer<typeof workflowInputSchema>;
 export type WorkflowOutput = z.infer<typeof workflowOutputSchema>;
-export type Ingredient = z.infer<typeof ingredientSchema>;
 export type Recipe = z.infer<typeof recipeSchema>;
-export type ScrapedContent = z.infer<typeof scrapedContentSchema>;

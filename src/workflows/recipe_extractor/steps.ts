@@ -1,40 +1,44 @@
-import { step } from '@outputai/core';
+import { step, z } from '@outputai/core';
 import { generateText, Output } from '@outputai/llm';
 import { fetchBlogContent } from '../../clients/jina.js';
-import { fetchContentInputSchema, scrapedContentSchema, recipeSchema } from './types.js';
-import type { ScrapedContent, Recipe } from './types.js';
+import { recipeSchema } from './types.js';
 
-export const fetchContent = step( {
+export const fetchRecipePage = step( {
   name: 'fetch_recipe_page',
-  description: 'Fetch recipe page content from URL using Jina Reader API',
-  inputSchema: fetchContentInputSchema,
-  outputSchema: scrapedContentSchema,
+  description: 'Fetch the blog post content from a URL using Jina Reader',
+  inputSchema: z.object( {
+    url: z.string().url()
+  } ),
+  outputSchema: z.object( {
+    title: z.string(),
+    content: z.string()
+  } ),
   fn: async ( { url } ) => {
     const response = await fetchBlogContent( url );
     return {
       title: response.data.title,
-      url: response.data.url,
-      content: response.data.content,
-      tokenCount: response.data.usage.tokens
+      content: response.data.content
     };
   }
 } );
 
 export const extractRecipe = step( {
   name: 'extract_recipe',
-  description: 'Extract structured recipe data from scraped page content using LLM',
-  inputSchema: scrapedContentSchema,
+  description: 'Extract structured recipe data from blog post content using an LLM',
+  inputSchema: z.object( {
+    title: z.string(),
+    content: z.string()
+  } ),
   outputSchema: recipeSchema,
-  fn: async ( input: ScrapedContent ) => {
+  fn: async ( { title, content } ) => {
     const { output } = await generateText( {
-      prompt: 'extract_recipe@v1',
-      variables: {
-        title: input.title,
-        content: input.content
-      },
-      output: Output.object( { schema: recipeSchema } )
+      prompt: 'extract_recipe',
+      variables: { title, content },
+      output: Output.object( {
+        schema: recipeSchema
+      } )
     } );
 
-    return output as Recipe;
+    return output;
   }
 } );
