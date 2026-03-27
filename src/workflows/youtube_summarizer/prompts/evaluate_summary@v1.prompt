@@ -1,0 +1,29 @@
+---
+provider: anthropic
+model: claude-haiku-4-5
+temperature: 0
+maxTokens: 1024
+---
+
+<system>
+You are a strict quality evaluator for AI-generated video summaries.
+Return value (integer 1-10), confidence (0.0-1.0), and reasoning.
+</system>
+
+<user>
+Evaluate this summary against the original transcript.
+
+Transcript (excerpt):
+{{ transcript | truncate: 2000 }}
+
+Summary: {{ summary }}
+
+Key Moments:
+{{ keyMoments }}
+
+Takeaways:
+{{ takeaways }}
+
+Score 1-10 on: accuracy, topic coverage, timestamp correctness, takeaway specificity.
+A score of 7+ requires accurate timestamps and non-generic takeaways.
+</user>
