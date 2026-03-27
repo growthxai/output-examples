@@ -1,27 +1,13 @@
-import { step, z } from '@outputai/core';
+import { step } from '@outputai/core';
 import { generateText, Output } from '@outputai/llm';
 import { fetchCommits, fetchMergedPullRequests } from '../../clients/github.js';
-import { categorizedChangesSchema } from './types.js';
-
-const repoParamsSchema = z.object( {
-  owner: z.string(),
-  repo: z.string(),
-  since: z.string(),
-  until: z.string()
-} );
-
-const commitDataSchema = z.array( z.object( {
-  sha: z.string(),
-  message: z.string(),
-  author: z.string()
-} ) );
-
-const prDataSchema = z.array( z.object( {
-  number: z.number(),
-  title: z.string(),
-  author: z.string(),
-  labels: z.array( z.string() )
-} ) );
+import {
+  repoParamsSchema,
+  commitDataSchema,
+  prDataSchema,
+  categorizeChangesInputSchema,
+  categorizedChangesSchema
+} from './types.js';
 
 export const fetchRepoCommits = step( {
   name: 'fetch_repo_commits',
@@ -59,10 +45,7 @@ export const fetchRepoPullRequests = step( {
 export const categorizeChanges = step( {
   name: 'categorize_changes',
   description: 'Use LLM to categorize commits and PRs into changelog categories',
-  inputSchema: z.object( {
-    commits: commitDataSchema,
-    pullRequests: prDataSchema
-  } ),
+  inputSchema: categorizeChangesInputSchema,
   outputSchema: categorizedChangesSchema,
   fn: async ( { commits, pullRequests } ) => {
     if ( commits.length === 0 && pullRequests.length === 0 ) {

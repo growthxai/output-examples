@@ -29,6 +29,35 @@ export const workflowOutputSchema = z.object( {
   changelog: z.string().describe( 'Human-readable formatted changelog' )
 } );
 
+export const repoParamsSchema = z.object( {
+  owner: z.string().describe( 'Repository owner' ),
+  repo: z.string().describe( 'Repository name' ),
+  since: z.string().describe( 'Start date in ISO format' ),
+  until: z.string().describe( 'End date in ISO format' )
+} );
+
+export const commitDataSchema = z.array( z.object( {
+  sha: z.string(),
+  message: z.string(),
+  author: z.string()
+} ) );
+
+export const prDataSchema = z.array( z.object( {
+  number: z.number(),
+  title: z.string(),
+  author: z.string(),
+  labels: z.array( z.string() )
+} ) );
+
+export const categorizeChangesInputSchema = z.object( {
+  commits: commitDataSchema,
+  pullRequests: prDataSchema
+} );
+
+export type RepoParams = z.infer<typeof repoParamsSchema>;
+export type CommitData = z.infer<typeof commitDataSchema>;
+export type PrData = z.infer<typeof prDataSchema>;
+export type CategorizeChangesInput = z.infer<typeof categorizeChangesInputSchema>;
 export type WorkflowInput = z.infer<typeof workflowInputSchema>;
 export type WorkflowOutput = z.infer<typeof workflowOutputSchema>;
 export type ChangeEntry = z.infer<typeof changeEntrySchema>;
