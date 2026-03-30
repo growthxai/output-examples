@@ -7,8 +7,8 @@ import {
   verifyKeyMomentDescriptions
 } from './evaluators.js';
 
-export default evalWorkflow({
-  name: getEvalWorkflowName('youtube_summarizer'),
+export default evalWorkflow( {
+  name: getEvalWorkflowName( 'youtube_summarizer' ),
   evals: [
     { evaluator: verifySummaryLength, criticality: CRITICALITY.REQUIRED, interpret: { type: 'boolean' } },
     { evaluator: verifyKeyMomentsCount, criticality: CRITICALITY.REQUIRED, interpret: { type: 'boolean' } },
@@ -16,4 +16,4 @@ export default evalWorkflow({
     { evaluator: verifyTimestampFormat, criticality: CRITICALITY.REQUIRED, interpret: { type: 'boolean' } },
     { evaluator: verifyKeyMomentDescriptions, criticality: CRITICALITY.REQUIRED, interpret: { type: 'boolean' } }
   ]
-});
+} );

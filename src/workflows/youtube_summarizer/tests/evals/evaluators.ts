@@ -5,16 +5,16 @@ import type { WorkflowOutput } from '../../types.js';
 
 type KeyMoment = WorkflowOutput['keyMoments'][number];
 
-function requireNumber(groundTruth: Record<string, unknown>, key: string): EvaluationBooleanResult | null {
+function requireNumber( groundTruth: Record<string, unknown>, key: string ): EvaluationBooleanResult | null {
   const v = groundTruth[key];
-  if (typeof v === 'number') {
+  if ( typeof v === 'number' ) {
     return null;
   }
-  return new EvaluationBooleanResult({
+  return new EvaluationBooleanResult( {
     value: false,
     confidence: 1,
     reasoning: `ground_truth.${key} must be a number`
-  });
+  } );
 }
 
 /** Summary meets minimum character length */
@@ -24,13 +24,13 @@ export const verifySummaryLength = verify(
     input: workflowInputSchema,
     output: workflowOutputSchema
   },
-  ({ output, context }) => {
-    const missing = requireNumber(context.ground_truth, 'summaryMinLength');
-    if (missing) {
+  ( { output, context } ) => {
+    const missing = requireNumber( context.ground_truth, 'summaryMinLength' );
+    if ( missing ) {
       return missing;
     }
     const min = context.ground_truth.summaryMinLength as number;
-    return Verdict.gte(output.summary.length, min);
+    return Verdict.gte( output.summary.length, min );
   }
 );
 
@@ -41,13 +41,13 @@ export const verifyKeyMomentsCount = verify(
     input: workflowInputSchema,
     output: workflowOutputSchema
   },
-  ({ output, context }) => {
-    const missing = requireNumber(context.ground_truth, 'minKeyMoments');
-    if (missing) {
+  ( { output, context } ) => {
+    const missing = requireNumber( context.ground_truth, 'minKeyMoments' );
+    if ( missing ) {
       return missing;
     }
     const min = context.ground_truth.minKeyMoments as number;
-    return Verdict.gte(output.keyMoments.length, min);
+    return Verdict.gte( output.keyMoments.length, min );
   }
 );
 
@@ -58,13 +58,13 @@ export const verifyTakeawaysCount = verify(
     input: workflowInputSchema,
     output: workflowOutputSchema
   },
-  ({ output, context }) => {
-    const missing = requireNumber(context.ground_truth, 'minTakeaways');
-    if (missing) {
+  ( { output, context } ) => {
+    const missing = requireNumber( context.ground_truth, 'minTakeaways' );
+    if ( missing ) {
       return missing;
     }
     const min = context.ground_truth.minTakeaways as number;
-    return Verdict.gte(output.takeaways.length, min);
+    return Verdict.gte( output.takeaways.length, min );
   }
 );
 
@@ -75,14 +75,14 @@ export const verifyTimestampFormat = verify(
     input: workflowInputSchema,
     output: workflowOutputSchema
   },
-  ({ output, context }) => {
+  ( { output, context } ) => {
     const should = context.ground_truth.shouldContainTimestamp;
-    if (should !== true) {
-      return Verdict.isTrue(true);
+    if ( should !== true ) {
+      return Verdict.isTrue( true );
     }
     const pattern = /^\d+:\d{2}(:\d{2})?$/;
-    const invalid = output.keyMoments.filter((m: KeyMoment) => !pattern.test(m.timestamp));
-    return Verdict.isTrue(invalid.length === 0);
+    const invalid = output.keyMoments.filter( ( m: KeyMoment ) => !pattern.test( m.timestamp ) );
+    return Verdict.isTrue( invalid.length === 0 );
   }
 );
 
@@ -93,8 +93,8 @@ export const verifyKeyMomentDescriptions = verify(
     input: workflowInputSchema,
     output: workflowOutputSchema
   },
-  ({ output }) => {
-    const empty = output.keyMoments.filter((m: KeyMoment) => !m.title.trim() || !m.description.trim());
-    return Verdict.isTrue(empty.length === 0);
+  ( { output } ) => {
+    const empty = output.keyMoments.filter( ( m: KeyMoment ) => !m.title.trim() || !m.description.trim() );
+    return Verdict.isTrue( empty.length === 0 );
   }
 );
