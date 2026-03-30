@@ -9,11 +9,11 @@ export default workflow( {
   description: 'Scores a sales call transcript against a chosen methodology (MEDDIC, BANT, or SPIN)',
   inputSchema: workflowInputSchema,
   outputSchema: workflowOutputSchema,
-  fn: async ( input ) => {
-    const dimensions = METHODOLOGY_DIMENSIONS[ input.methodology ];
+  fn: async input => {
+    const dimensions = METHODOLOGY_DIMENSIONS[input.methodology];
 
     const evaluations = await Promise.all(
-      dimensions.map( ( dimension ) =>
+      dimensions.map( dimension =>
         scoreDimension( {
           transcript: input.transcript,
           methodology: input.methodology,
@@ -23,15 +23,23 @@ export default workflow( {
     );
 
     const dimensionScores: DimensionResult[] = evaluations.map( ( evaluation, i ) => ( {
-      dimension: evaluation.name ?? dimensions[ i ],
+      dimension: evaluation.name ?? dimensions[i],
       score: evaluation.value,
       confidence: evaluation.confidence,
       reasoning: evaluation.reasoning,
       feedback: evaluation.feedback
     } ) );
 
-    const scoresText = dimensionScores.map( ( d ) =>
-      `### ${d.dimension}: ${d.score}/10\n- Evidence: ${d.reasoning ?? 'N/A'}${d.feedback?.map( f => `\n- Gap: ${f.issue}${f.suggestion ? `\n- Recommendation: ${f.suggestion}` : ''}` ).join( '' ) ?? ''}`
+    const formatFeedback = ( list: DimensionResult['feedback'] ) => list?.map( f =>
+      [ `- Gap: ${f.issue}` ].concat( f.suggestion ? `- Recommendation: ${f.suggestion}` : [] )
+    ).flat().join( '\n' );
+
+    const scoresText = dimensionScores.map( d =>
+      [
+        `### ${d.dimension}: ${d.score}/10`,
+        `- Evidence: ${d.reasoning ?? 'N/A'}`,
+        formatFeedback( d.feedback )
+      ].filter( v => v ).join( '\n' )
     ).join( '\n\n' );
 
     const synthesis = await synthesizeResults( {

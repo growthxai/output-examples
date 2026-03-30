@@ -5,12 +5,12 @@ import { credentials } from '@outputai/credentials';
 const token = credentials.get( 'github.token' );
 
 const headers: Record<string, string> = {
-  'Accept': 'application/vnd.github+json',
+  Accept: 'application/vnd.github+json',
   'X-GitHub-Api-Version': '2022-11-28'
 };
 
 if ( token ) {
-  headers[ 'Authorization' ] = `Bearer ${token}`;
+  headers['Authorization'] = `Bearer ${token}`;
 }
 
 const client = httpClient( {
@@ -44,36 +44,34 @@ export interface GitHubPullRequest {
   labels: Array<{ name: string }>;
 }
 
-async function fetchAllPages<T>( path: string, searchParams: Record<string, string> ): Promise<T[]> {
-  const results: T[] = [];
-  let page = 1;
+async function fetchAllPages<T>(
+  path: string,
+  searchParams: Record<string, string>,
+  page = 1,
+  acc: T[] = []
+): Promise<T[]> {
   const perPage = 100;
+  const response = await client.get( path, {
+    searchParams: { ...searchParams, page: String( page ), per_page: String( perPage ) }
+  } );
 
-  while ( true ) {
-    const response = await client.get( path, {
-      searchParams: { ...searchParams, page: String( page ), per_page: String( perPage ) }
-    } );
-
-    if ( response.status === 404 ) {
-      throw new FatalError( `Repository not found: ${path}` );
-    }
-
-    const data = await response.json() as T[];
-
-    if ( !Array.isArray( data ) || data.length === 0 ) {
-      break;
-    }
-
-    results.push( ...data );
-
-    if ( data.length < perPage ) {
-      break;
-    }
-
-    page++;
+  if ( response.status === 404 ) {
+    throw new FatalError( `Repository not found: ${path}` );
   }
 
-  return results;
+  const data = await response.json() as T[];
+
+  if ( !Array.isArray( data ) || data.length === 0 ) {
+    return acc;
+  }
+
+  acc.push( ...data );
+
+  if ( data.length < perPage ) {
+    return acc;
+  }
+
+  return fetchAllPages( path, searchParams, page + 1, acc );
 }
 
 export async function fetchCommits(
@@ -103,7 +101,9 @@ export async function fetchMergedPullRequests(
   const untilDate = new Date( until );
 
   return allPrs.filter( pr => {
-    if ( !pr.merged_at ) return false;
+    if ( !pr.merged_at ) {
+      return false;
+    }
     const mergedDate = new Date( pr.merged_at );
     return mergedDate >= sinceDate && mergedDate <= untilDate;
   } );

@@ -8,7 +8,7 @@ export default workflow( {
   description: 'Generate a categorized changelog from GitHub commits and merged PRs within a date range',
   inputSchema: workflowInputSchema,
   outputSchema: workflowOutputSchema,
-  fn: async ( input ) => {
+  fn: async input => {
     const { owner, repo } = parseGitHubUrl( input.repoUrl );
     const repoSlug = `${owner}/${repo}`;
     const since = `${input.startDate}T00:00:00Z`;
