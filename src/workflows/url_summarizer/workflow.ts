@@ -8,7 +8,7 @@ export default workflow( {
   description: 'Scrapes any URL and produces a clean summary with key points, FAQ, and TLDR',
   inputSchema: workflowInputSchema,
   outputSchema: workflowOutputSchema,
-  fn: async ( input ) => {
+  fn: async input => {
     const validatedUrl = validateUrl( input.url );
     const pageContent = await fetchContent( { url: validatedUrl } );
     const summary = await summarizeContent( {

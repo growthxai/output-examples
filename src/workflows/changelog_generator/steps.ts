@@ -19,7 +19,7 @@ export const fetchRepoCommits = step( {
 
     return commits.map( c => ( {
       sha: c.sha.slice( 0, 7 ),
-      message: c.commit.message.split( '\n' )[ 0 ],
+      message: c.commit.message.split( '\n' )[0],
       author: c.author?.login ?? c.commit.author.name
     } ) );
   }

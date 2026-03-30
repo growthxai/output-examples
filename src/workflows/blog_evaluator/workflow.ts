@@ -1,4 +1,4 @@
-import { workflow, z } from '@outputai/core';
+import { workflow } from '@outputai/core';
 import { validateUrl } from '../../shared/utils/url.js';
 import { fetchContent } from './steps.js';
 import { evaluateSignalToNoise } from './evaluators.js';
@@ -10,7 +10,7 @@ export default workflow( {
   description: 'AI Agents &amp; Workflows built with Output.ai for output-examples',
   inputSchema: workflowInputSchema,
   outputSchema: workflowOutputSchema,
-  fn: async ( input ) => {
+  fn: async input => {
     const validatedUrl = validateUrl( input.url );
     const blogContent = await fetchContent( { url: validatedUrl } );
     const evaluation = await evaluateSignalToNoise( blogContent );

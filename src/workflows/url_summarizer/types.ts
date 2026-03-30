@@ -33,7 +33,7 @@ export const workflowInputSchema = z.object( {
 
 export const workflowOutputSchema = z.object( {
   url: z.string(),
-  title: z.string(),
+  title: z.string()
 } ).merge( summarySchema );
 
 export type UrlContent = z.infer<typeof urlContentSchema>;

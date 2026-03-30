@@ -7,7 +7,7 @@ export function parseGitHubUrl( url: string ): { owner: string; repo: string } {
     throw new Error( `Invalid GitHub URL: ${url}` );
   }
 
-  return { owner: match[ 1 ], repo: match[ 2 ] };
+  return { owner: match[1], repo: match[2] };
 }
 
 export function formatChangelog(

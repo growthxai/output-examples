@@ -31,7 +31,7 @@ export const scoreDimension = evaluator( {
   description: 'Score a single methodology dimension against a call transcript',
   inputSchema: scoreDimensionInputSchema,
   fn: async ( { transcript, methodology, dimension } ) => {
-    const dimensionDescription = DIMENSION_DESCRIPTIONS[ methodology ]?.[ dimension ] ?? '';
+    const dimensionDescription = DIMENSION_DESCRIPTIONS[methodology]?.[dimension] ?? '';
 
     const { output } = await generateText( {
       prompt: 'score_dimension@v1',
