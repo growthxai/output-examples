@@ -40,6 +40,13 @@ export const workflowOutputSchema = z.object( {
   title: z.string()
 } ).merge( summaryOutputSchema );
 
+export const evaluateSummaryQualityInputSchema = z.object( {
+  transcript: z.string(),
+  summary: z.string(),
+  keyMoments: z.array( keyMomentSchema ),
+  takeaways: z.array( z.string() )
+} );
+
 export type TranscriptSegment = z.infer<typeof transcriptSegmentSchema>;
 export type Transcript = z.infer<typeof transcriptSchema>;
 export type SummaryOutput = z.infer<typeof summaryOutputSchema>;
