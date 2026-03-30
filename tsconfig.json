@@ -3,6 +3,10 @@
     "target": "ES2022",
     "module": "ES2022",
     "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": {
+      "youtube-transcript/dist/youtube-transcript.esm.js": ["node_modules/youtube-transcript/dist/index.d.ts"]
+    },
     "resolveJsonModule": true,
     "allowJs": true,
     "strict": true,

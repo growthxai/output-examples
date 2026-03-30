@@ -1,0 +1,8 @@
+name: long_video
+input:
+  url: 'https://www.youtube.com/watch?v=aircAruvnKk'
+ground_truth:
+  minKeyMoments: 5
+  minTakeaways: 3
+  summaryMinLength: 80
+  shouldContainTimestamp: true
