@@ -104,7 +104,7 @@ export default defineConfig( [
     ]
   },
   {
-    files: [ '**/*.{js,mjs,cjs,ts,tsx}' ],
+    files: [ 'src/**/*.{js,mjs,cjs,ts,tsx}' ],
     plugins: {
       'check-file': checkFile,
       '@typescript-eslint': tsEslint.plugin,
