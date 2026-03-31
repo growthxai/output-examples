@@ -20,7 +20,7 @@ export interface NpmRegistryResponse {
 export interface NpmPackageInfo {
   name: string;
   /** Highest registry version that satisfies the requested semver range. */
-  resolvedVersion: string;
+  version: string;
   license: string;
   lastPublish: string;
 }
@@ -32,15 +32,11 @@ export interface NpmError {
   error: string
 }
 
-/**
- * Resolves npm registry license field to a display string, or undefined if absent.
- */
-function resolveLicenseField( license: NpmLicenseField ): string | undefined {
-  const fromObject =
-    typeof license !== 'string' && license && typeof license === 'object' && 'type' in license ?
-      license.type :
-      undefined;
-  return typeof license === 'string' ? license : fromObject;
+function resolveLicenseField( license: NpmLicenseField ): string {
+  if ( license === undefined ) {
+    return 'UNDECLARED';
+  }
+  return typeof license === 'object' ? license.type : license;
 }
 
 /**
@@ -59,42 +55,23 @@ export async function fetchPackageMetadata(
   } );
 
   if ( response.status === 404 ) {
-    return {
-      name,
-      error: 'Package not found'
-    } as NpmError;
+    return { name, error: 'Package not found' } as NpmError;
   }
 
-  const data = await response.json() as NpmRegistryResponse;
+  const { versions, time: pubDates } = await response.json() as NpmRegistryResponse;
 
-  const versionKeys = Object.keys( data.versions || {} );
-  const maxSatisfying = semver.maxSatisfying( versionKeys, versionRange, { includePrerelease: false } );
-  const resolvedVersion =
-    maxSatisfying ??
-    ( versionKeys.includes( versionRange ) ? versionRange : null );
+  const maxSatisfying = semver.maxSatisfying( Object.keys( versions ), versionRange, { includePrerelease: false } ) as string | null;
+  const fallbackVersion = Object.hasOwn( versions, versionRange ) ? versionRange : null;
+  const version = maxSatisfying ?? fallbackVersion;
 
-  if ( resolvedVersion === null ) {
-    return {
-      name,
-      error: `No published version satisfies range "${versionRange}"`
-    } as NpmError;
+  if ( version === null ) {
+    return { name, error: `No published version satisfies range "${versionRange}"` } as NpmError;
   }
-
-  const fromVersion = data.versions?.[resolvedVersion] ?
-    resolveLicenseField( data.versions[resolvedVersion].license ) :
-    undefined;
-  const resolved = resolveLicenseField( data.license ) ?? fromVersion;
-  const license = resolved ?? 'UNDECLARED';
-
-  const lastPublish =
-    data.time?.[resolvedVersion] ??
-    data.time?.modified ??
-    new Date( 0 ).toISOString();
 
   return {
     name,
-    resolvedVersion,
-    license,
-    lastPublish
+    version,
+    license: resolveLicenseField( versions[version].license ),
+    lastPublish: pubDates.modified
   };
 }

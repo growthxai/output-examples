@@ -85,7 +85,7 @@ export const fetchNpmMetadata = step( {
       return {
         name,
         versionRange,
-        version: pkgInfo.resolvedVersion,
+        version: pkgInfo.version,
         license: pkgInfo.license,
         lastPublish: pkgInfo.lastPublish
       };
