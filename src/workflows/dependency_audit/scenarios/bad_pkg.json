@@ -1,0 +1,6 @@
+{
+  "repoUrl": "https://github.com/moment/moment",
+  "ref": "master",
+  "allowedLicenses": ["MIT", "ISC", "BSD-2-Clause", "BSD-3-Clause", "Apache-2.0", "0BSD"],
+  "abandonmentThresholdDays": 730
+}

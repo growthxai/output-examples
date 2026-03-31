@@ -108,3 +108,70 @@ export async function fetchMergedPullRequests(
     return mergedDate >= sinceDate && mergedDate <= untilDate;
   } );
 }
+
+// --- Dependency audit additions ---
+
+export interface GitHubFileContent {
+  content: string;
+  encoding: string;
+  sha: string;
+}
+
+export interface GitHubSecurityAdvisory {
+  ghsa_id: string;
+  cve_id: string | null;
+  severity: string;
+  summary: string;
+  vulnerabilities: Array<{
+    package: {
+      ecosystem: string;
+      name: string;
+    };
+    vulnerable_version_range: string;
+    first_patched_version: { identifier: string } | null;
+  }>;
+}
+
+export async function fetchFileContent(
+  owner: string,
+  repo: string,
+  path: string,
+  ref: string
+): Promise<GitHubFileContent> {
+  const response = await client.get( `repos/${owner}/${repo}/contents/${path}`, {
+    searchParams: { ref }
+  } );
+
+  if ( response.status === 404 ) {
+    throw new FatalError( `File not found: ${owner}/${repo}/${path}@${ref}` );
+  }
+
+  return response.json() as Promise<GitHubFileContent>;
+}
+
+export async function fetchSecurityAdvisories(
+  packageNames: string[]
+): Promise<GitHubSecurityAdvisory[]> {
+  const advisories: GitHubSecurityAdvisory[] = [];
+
+  for ( const name of packageNames ) {
+    try {
+      const response = await client.get( 'advisories', {
+        searchParams: {
+          ecosystem: 'npm',
+          package: name,
+          per_page: '100'
+        }
+      } );
+
+      const data = await response.json() as GitHubSecurityAdvisory[];
+      if ( Array.isArray( data ) ) {
+        advisories.push( ...data );
+      }
+    } catch {
+      // Skip packages that fail — advisory lookup is best-effort
+    }
+  }
+
+  return advisories;
+}
