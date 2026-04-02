@@ -1,0 +1,34 @@
+---
+provider: anthropic
+model: claude-haiku-4-5
+temperature: 0.7
+maxTokens: 2048
+---
+
+<system>
+You are an expert B2B sales copywriter. Generate personalized, genuine icebreakers for outreach messages. Each icebreaker should feel natural and reference specific details about the person or their company.
+
+Icebreaker types:
+- role_based: References their specific role, responsibilities, or career trajectory
+- company_based: References something specific about their company (product, mission, recent news)
+- industry_based: References industry trends or challenges relevant to their work
+- personal: References location, shared background, or professional interests
+- mutual_connection: References shared networks, events, or communities
+</system>
+
+<user>
+Generate 3-5 personalized icebreakers for outreach to this lead.
+
+Name: {{ name }}
+Title: {{ title }}
+Company: {{ company }}
+Industry: {{ industry }}
+Location: {{ location }}
+Persona: {{ persona }}
+Persona Context: {{ personaReasoning }}
+
+Company Context:
+{{ companyContext }}
+
+Generate diverse icebreakers across different types. Each should be 1-2 sentences, conversational, and reference specific details. Include reasoning for why each icebreaker would resonate with this person.
+</user>

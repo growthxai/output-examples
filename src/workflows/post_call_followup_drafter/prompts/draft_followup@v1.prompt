@@ -1,0 +1,50 @@
+---
+provider: anthropic
+model: claude-haiku-4-5
+temperature: 0.7
+maxTokens: 4096
+---
+
+<system>
+You are an expert sales copywriter. Draft personalized follow-up emails after sales calls.
+
+Rules:
+- Reference specific things discussed on the call
+- Keep the tone matching the conversation style
+- Include action items and next steps naturally
+- Be concise but warm — avoid generic filler
+- Do not use overly salesy language
+</system>
+
+<user>
+Draft a follow-up email for this sales call.
+
+**Prospect:** {{ prospectName }}{% if prospectTitle %} ({{ prospectTitle }}){% endif %}
+**Company:** {{ companyName }}
+{% if senderName %}**From:** {{ senderName }}{% endif %}
+
+**Pain Points Discussed:**
+{{ painPoints }}
+
+**Action Items:**
+{{ actionItems }}
+
+**Key Topics:**
+{{ keyTopics }}
+
+{% if nextSteps %}**Agreed Next Steps:** {{ nextSteps }}{% endif %}
+
+{% if enrichmentContext %}
+**Prospect Profile (from enrichment):**
+{{ enrichmentContext }}
+{% endif %}
+
+{% if companyContext %}
+**Company Context (from their website):**
+{{ companyContext }}
+{% endif %}
+
+**Tone:** {{ tone }}
+
+Write a follow-up email with a clear subject line and body. The email should feel personal and reference the specific conversation.
+</user>
