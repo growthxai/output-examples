@@ -37,7 +37,7 @@ export const personaClassificationSchema = z.object( {
     'financial_decision_maker',
     'other'
   ] ),
-  confidence: z.number().min( 0 ).max( 1 ),
+  confidence: z.number(),
   reasoning: z.string()
 } );
 

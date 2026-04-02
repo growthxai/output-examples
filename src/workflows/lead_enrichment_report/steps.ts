@@ -3,7 +3,6 @@ import { generateText, Output } from '@outputai/llm';
 import { matchPerson } from '../../shared/clients/apollo.js';
 import { fetchBlogContent } from '../../clients/jina.js';
 import { personProfileSchema, companyContextSchema, personaClassificationSchema, icebreakerSchema } from './types.js';
-import type { PersonProfile, CompanyContext } from './types.js';
 
 export const enrichPerson = step( {
   name: 'enrich_person',
