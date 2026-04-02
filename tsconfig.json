@@ -3,6 +3,10 @@
     "target": "ES2022",
     "module": "ES2022",
     "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": {
+      "youtube-transcript/dist/youtube-transcript.esm.js": ["node_modules/youtube-transcript/dist/index.d.ts"]
+    },
     "resolveJsonModule": true,
     "allowJs": true,
     "strict": true,
@@ -15,6 +19,6 @@
     "outDir": "./dist",
     "rootDir": "./src",
   },
-  "include": ["./**/*.js", "./**/*.ts", "./**/*.prompt" ],
+  "include": ["./src/**/*.ts", "./src/**/*.js", "./src/**/*.prompt"],
   "exclude": ["node_modules", "dist"]
 }

@@ -1,0 +1,24 @@
+---
+provider: anthropic
+model: claude-haiku-4-5
+temperature: 0.3
+maxTokens: 4096
+---
+
+<system>
+You are an expert video content analyst. Given a YouTube video transcript with timestamps, produce a structured summary.
+</system>
+
+<user>
+Summarize the following YouTube video transcript.
+
+Title: {{ title }}
+
+Transcript (with timestamps):
+{{ transcript }}
+
+Produce:
+1. **summary** — A concise 2-3 sentence TLDR capturing the video's core message.
+2. **keyMoments** — 5-10 key moments. Each must include the exact timestamp from the transcript (MM:SS or HH:MM:SS), a short title, and a one-sentence description.
+3. **takeaways** — 3-7 actionable insights or key learnings.
+</user>

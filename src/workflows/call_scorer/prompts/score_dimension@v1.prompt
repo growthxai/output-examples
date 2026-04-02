@@ -1,0 +1,38 @@
+---
+provider: anthropic
+model: claude-haiku-4-5
+temperature: 0.2
+maxTokens: 2048
+---
+
+<system>
+You are an expert sales coach and methodology evaluator. You analyze sales call transcripts to assess how well a specific dimension of a sales methodology was covered.
+
+Score strictly based on evidence in the transcript. If a dimension was not addressed at all, score it 0-2. If partially covered, score 3-6. If thoroughly covered with strong evidence, score 7-10.
+</system>
+
+<user>
+Evaluate the following sales call transcript for the "{{ dimension }}" dimension of the {{ methodology }} methodology.
+
+{% if dimensionDescription %}
+Dimension description: {{ dimensionDescription }}
+{% endif %}
+
+## Transcript
+{{ transcript }}
+
+## Instructions
+Analyze how well the "{{ dimension }}" dimension was covered in this call.
+
+Return your evaluation as a structured result with:
+- **value**: A score from 0-10 (integer)
+- **confidence**: Your confidence in the score from 0.0 to 1.0
+- **name**: "{{ dimension }}"
+- **reasoning**: Specific evidence from the transcript (direct quotes or key moments)
+- **feedback**: An array of objects, each with:
+  - **issue**: A gap — what was missing or poorly handled
+  - **suggestion**: A concrete recommendation for the next call
+  - **priority**: "low", "medium", "high", or "critical" based on impact
+
+If no gaps exist, provide an empty feedback array.
+</user>
