@@ -16,6 +16,13 @@ export const participantSchema = z.object( {
   company: z.string().nullable().optional().describe( 'Company if mentioned in transcript' )
 } );
 
+export const enrichedParticipantSchema = participantSchema.extend( {
+  title: z.string().optional().describe( 'Job title from enrichment' ),
+  linkedinUrl: z.string().optional().describe( 'LinkedIn URL from enrichment' ),
+  organizationName: z.string().optional().describe( 'Organization name from enrichment' ),
+  organizationIndustry: z.string().optional().describe( 'Industry from enrichment' )
+} );
+
 export const extractionResultSchema = z.object( {
   participants: z.array( participantSchema ).describe( 'All participants identified in the call' ),
   actionItems: z.array( actionItemSchema ).describe( 'All action items extracted from the transcript' ),
@@ -27,7 +34,7 @@ export const workflowInputSchema = z.object( {
 } );
 
 export const workflowOutputSchema = z.object( {
-  participants: z.array( participantSchema ),
+  participants: z.array( enrichedParticipantSchema ),
   actionItems: z.array( actionItemSchema ),
   callSummary: z.string(),
   totalActionItems: z.number(),
@@ -37,6 +44,7 @@ export const workflowOutputSchema = z.object( {
 
 export type ActionItem = z.infer<typeof actionItemSchema>;
 export type Participant = z.infer<typeof participantSchema>;
+export type EnrichedParticipant = z.infer<typeof enrichedParticipantSchema>;
 export type ExtractionResult = z.infer<typeof extractionResultSchema>;
 export type WorkflowInput = z.infer<typeof workflowInputSchema>;
 export type WorkflowOutput = z.infer<typeof workflowOutputSchema>;
