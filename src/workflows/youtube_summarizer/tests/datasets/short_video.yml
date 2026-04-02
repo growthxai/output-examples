@@ -1,0 +1,8 @@
+name: short_video
+input:
+  url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+ground_truth:
+  minKeyMoments: 3
+  minTakeaways: 2
+  summaryMinLength: 50
+  shouldContainTimestamp: true

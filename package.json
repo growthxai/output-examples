@@ -8,21 +8,34 @@
     "output:worker:install": "npm install",
     "output:worker:build": "rm -rf dist/* && tsc -p ./ && copyfiles './src/**/*.prompt' './src/**/*.yml.enc' './src/**/*.key' dist -u 1",
     "output:worker:start": "output-worker",
-    "dev": "output dev"
+    "dev": "output dev",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix"
   },
   "dependencies": {
-    "@outputai/output": "^0.1.8"
+    "youtube-transcript": "1.3.0",
+    "@outputai/output": "^0.1.8",
+    "cvss": "1.0.5",
+    "semver": "7.7.3"
   },
   "devDependencies": {
-    "@types/node": "^24.0.0",
+    "@types/semver": "7.7.1",
+    "@stylistic/eslint-plugin": "5.10.0",
+    "@types/node": "24.12.0",
+    "eslint": "10.1.0",
+    "eslint-plugin-check-file": "3.3.1",
+    "globals": "17.4.0",
     "native-copyfiles": "2.0.1",
     "nodemon": "3.1.0",
-    "typescript": "^5.7.0"
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.57.2"
   },
   "engines": {
     "node": ">=24.3.0"
   },
   "output": {
-    "hookFiles": ["node_modules/@outputai/credentials/dist/hooks.js"]
+    "hookFiles": [
+      "node_modules/@outputai/credentials/dist/hooks.js"
+    ]
   }
 }

@@ -21,7 +21,7 @@ export async function fetchBlogContent( url: string ): Promise<JinaReaderRespons
   const response = await jinaClient.post( '', {
     json: { url },
     headers: {
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'Content-Type': 'application/json',
       'X-Return-Format': 'markdown'
     }
