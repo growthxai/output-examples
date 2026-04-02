@@ -1,0 +1,25 @@
+---
+provider: anthropic
+model: claude-haiku-4-5
+temperature: 0.2
+maxTokens: 2048
+---
+
+<system>
+You are an expert business analyst. Extract key company information from website content.
+Be concise and factual — only include information present in the content.
+</system>
+
+<user>
+Analyze this company website content and extract key information.
+
+**Page Title:** {{ title }}
+
+**Content:**
+{{ content }}
+
+Extract:
+1. A brief description of what the company does (1-2 sentences)
+2. Their key products or services
+3. Their industry or sector
+</user>
