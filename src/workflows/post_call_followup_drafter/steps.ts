@@ -1,7 +1,8 @@
 import { step, z, FatalError } from '@outputai/core';
 import { generateText, Output } from '@outputai/llm';
 import { fetchBlogContent } from '../../clients/jina.js';
-import { callInsightsSchema, companyContextSchema, followUpEmailSchema } from './types.js';
+import { matchPerson } from '../../shared/clients/apollo.js';
+import { callInsightsSchema, companyContextSchema, followUpEmailSchema, prospectEnrichmentSchema } from './types.js';
 
 export const extractCallInsights = step( {
   name: 'extract_call_insights',
@@ -22,6 +23,36 @@ export const extractCallInsights = step( {
     }
 
     return output;
+  }
+} );
+
+export const enrichProspect = step( {
+  name: 'enrich_prospect',
+  description: 'Enrich prospect profile using Apollo People Match API',
+  inputSchema: z.object( {
+    email: z.string().email()
+  } ),
+  outputSchema: prospectEnrichmentSchema,
+  fn: async ( { email } ) => {
+    const result = await matchPerson( { email } );
+
+    const p = result.person;
+    if ( !p ) {
+      return {
+        email
+      };
+    }
+
+    return {
+      firstName: p.first_name || undefined,
+      lastName: p.last_name || undefined,
+      title: p.title ?? undefined,
+      email: p.email ?? email,
+      linkedinUrl: p.linkedin_url ?? undefined,
+      organizationName: p.organization?.name ?? undefined,
+      organizationWebsite: p.organization?.website_url ?? undefined,
+      organizationIndustry: p.organization?.industry ?? undefined
+    };
   }
 } );
 
@@ -73,6 +104,7 @@ export const draftFollowUpEmail = step( {
     nextSteps: z.string().optional(),
     tone: z.enum( [ 'formal', 'casual', 'technical' ] ),
     companyContext: z.string().optional(),
+    enrichmentContext: z.string().optional(),
     senderName: z.string().optional()
   } ),
   outputSchema: followUpEmailSchema,
@@ -96,6 +128,7 @@ export const draftFollowUpEmail = step( {
         keyTopics: keyTopicsText,
         nextSteps: input.nextSteps || '',
         companyContext: input.companyContext || '',
+        enrichmentContext: input.enrichmentContext || '',
         tone: input.tone,
         senderName: input.senderName || ''
       },

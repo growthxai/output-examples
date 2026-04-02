@@ -24,6 +24,17 @@ export const companyContextSchema = z.object( {
   industry: z.string().optional().describe( 'Industry or sector' )
 } );
 
+export const prospectEnrichmentSchema = z.object( {
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  title: z.string().optional(),
+  email: z.string().optional(),
+  linkedinUrl: z.string().optional(),
+  organizationName: z.string().optional(),
+  organizationWebsite: z.string().optional(),
+  organizationIndustry: z.string().optional()
+} );
+
 export const followUpEmailSchema = z.object( {
   subject: z.string().describe( 'Email subject line' ),
   body: z.string().describe( 'Full email body text' )
@@ -31,18 +42,21 @@ export const followUpEmailSchema = z.object( {
 
 export const workflowInputSchema = z.object( {
   transcript: z.string().describe( 'Sales call transcript text' ),
+  prospectEmail: z.string().email().optional().describe( 'Optional prospect email for Apollo enrichment' ),
   companyUrl: z.string().url().optional().describe( 'Optional company website URL for enrichment' ),
   senderName: z.string().optional().describe( 'Name of the sales rep sending the follow-up' )
 } );
 
 export const workflowOutputSchema = z.object( {
   email: followUpEmailSchema,
-  insights: callInsightsSchema
+  insights: callInsightsSchema,
+  prospectEnrichment: prospectEnrichmentSchema.optional()
 } );
 
 export type ActionItem = z.infer<typeof actionItemSchema>;
 export type CallInsights = z.infer<typeof callInsightsSchema>;
 export type CompanyContext = z.infer<typeof companyContextSchema>;
+export type ProspectEnrichment = z.infer<typeof prospectEnrichmentSchema>;
 export type FollowUpEmail = z.infer<typeof followUpEmailSchema>;
 export type WorkflowInput = z.infer<typeof workflowInputSchema>;
 export type WorkflowOutput = z.infer<typeof workflowOutputSchema>;

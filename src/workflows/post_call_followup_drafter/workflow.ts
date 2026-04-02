@@ -1,5 +1,5 @@
 import { workflow } from '@outputai/core';
-import { extractCallInsights, enrichCompanyContext, draftFollowUpEmail } from './steps.js';
+import { extractCallInsights, enrichProspect, enrichCompanyContext, draftFollowUpEmail } from './steps.js';
 import { workflowInputSchema, workflowOutputSchema } from './types.js';
 
 export default workflow( {
@@ -10,7 +10,18 @@ export default workflow( {
   fn: async ( input ) => {
     const insights = await extractCallInsights( { transcript: input.transcript } );
 
-    const enrichmentUrl = input.companyUrl || insights.companyUrl;
+    let prospectEnrichment;
+    if ( input.prospectEmail ) {
+      try {
+        prospectEnrichment = await enrichProspect( { email: input.prospectEmail } );
+      } catch {
+        // Apollo enrichment is optional — proceed without it
+      }
+    }
+
+    const enrichmentUrl = input.companyUrl
+      || prospectEnrichment?.organizationWebsite
+      || insights.companyUrl;
     let companyContext: string | undefined;
 
     if ( enrichmentUrl ) {
@@ -25,9 +36,19 @@ export default workflow( {
       }
     }
 
+    let enrichmentContext: string | undefined;
+    if ( prospectEnrichment ) {
+      const parts: string[] = [];
+      if ( prospectEnrichment.title ) parts.push( `Title: ${prospectEnrichment.title}` );
+      if ( prospectEnrichment.linkedinUrl ) parts.push( `LinkedIn: ${prospectEnrichment.linkedinUrl}` );
+      if ( prospectEnrichment.organizationName ) parts.push( `Company: ${prospectEnrichment.organizationName}` );
+      if ( prospectEnrichment.organizationIndustry ) parts.push( `Industry: ${prospectEnrichment.organizationIndustry}` );
+      if ( parts.length ) enrichmentContext = parts.join( '\n' );
+    }
+
     const email = await draftFollowUpEmail( {
       prospectName: insights.prospectName,
-      prospectTitle: insights.prospectTitle,
+      prospectTitle: prospectEnrichment?.title || insights.prospectTitle,
       companyName: insights.companyName,
       painPoints: insights.painPoints,
       actionItems: insights.actionItems,
@@ -35,12 +56,14 @@ export default workflow( {
       nextSteps: insights.nextSteps,
       tone: insights.tone,
       companyContext,
+      enrichmentContext,
       senderName: input.senderName
     } );
 
     return {
       email,
-      insights
+      insights,
+      prospectEnrichment
     };
   },
   options: {

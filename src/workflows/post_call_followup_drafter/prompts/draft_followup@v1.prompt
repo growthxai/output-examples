@@ -34,6 +34,11 @@ Draft a follow-up email for this sales call.
 
 {% if nextSteps %}**Agreed Next Steps:** {{ nextSteps }}{% endif %}
 
+{% if enrichmentContext %}
+**Prospect Profile (from enrichment):**
+{{ enrichmentContext }}
+{% endif %}
+
 {% if companyContext %}
 **Company Context (from their website):**
 {{ companyContext }}
