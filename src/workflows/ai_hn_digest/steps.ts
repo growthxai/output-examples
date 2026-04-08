@@ -15,7 +15,7 @@ import {
   RenderHtmlOutputSchema,
   PublishToBeehiivInputSchema,
   PublishToBeehiivOutputSchema,
-  TakeawaySchema,
+  TakeawaySchema
 } from './types.js';
 import type { HnStory, ScoredStory } from './types.js';
 
@@ -48,7 +48,7 @@ export const fetchTopStories = step( {
             title: item.title as string,
             url: ( item.url as string ) || undefined,
             score: ( item.score as number ) || 0,
-            descendants: ( item.descendants as number ) || 0,
+            descendants: ( item.descendants as number ) || 0
           } );
         }
       }
@@ -61,7 +61,7 @@ export const fetchTopStories = step( {
     }
 
     return { stories };
-  },
+  }
 } );
 
 // --- Step 2: Score stories by relevance using LLM ---
@@ -72,25 +72,25 @@ export const scoreStories = step( {
   inputSchema: ScoreStoriesInputSchema,
   outputSchema: ScoreStoriesOutputSchema,
   fn: async ( { profile, stories } ) => {
-    const withUrls = stories.filter( ( s ) => s.url );
+    const withUrls = stories.filter( s => s.url );
 
     const { output } = await generateText( {
       prompt: 'score_stories@v1',
       variables: {
         profile,
         stories: JSON.stringify(
-          withUrls.map( ( s ) => ( { id: s.id, title: s.title, url: s.url, score: s.score } ) )
-        ),
+          withUrls.map( s => ( { id: s.id, title: s.title, url: s.url, score: s.score } ) )
+        )
       },
       output: Output.object( {
         schema: z.object( {
           picks: z.array( z.object( {
             id: z.number(),
             relevanceScore: z.number(),
-            reason: z.string(),
-          } ) ),
-        } ),
-      } ),
+            reason: z.string()
+          } ) )
+        } )
+      } )
     } );
 
     if ( !output || !output.picks || output.picks.length === 0 ) {
@@ -100,13 +100,13 @@ export const scoreStories = step( {
     const merged: ScoredStory[] = [];
 
     for ( const pick of output.picks ) {
-      const story = withUrls.find( ( s ) => s.id === pick.id );
+      const story = withUrls.find( s => s.id === pick.id );
       if ( story && story.url ) {
         merged.push( {
           ...story,
           url: story.url,
           relevanceScore: pick.relevanceScore,
-          reason: pick.reason,
+          reason: pick.reason
         } );
       }
     }
@@ -114,7 +114,7 @@ export const scoreStories = step( {
     merged.sort( ( a, b ) => b.relevanceScore - a.relevanceScore );
 
     return { picks: merged.slice( 0, 15 ) };
-  },
+  }
 } );
 
 // --- Step 3: Fetch and analyze a single article (called in parallel) ---
@@ -143,14 +143,14 @@ export const fetchAndAnalyzeArticle = step( {
         profile,
         title: story.title,
         url: story.url,
-        content,
+        content
       },
       output: Output.object( {
         schema: z.object( {
           tldr: z.string(),
-          takeaways: z.array( TakeawaySchema ),
-        } ),
-      } ),
+          takeaways: z.array( TakeawaySchema )
+        } )
+      } )
     } );
 
     if ( !output ) {
@@ -167,10 +167,10 @@ export const fetchAndAnalyzeArticle = step( {
         descendants: story.descendants,
         relevanceScore: story.relevanceScore,
         tldr: output.tldr,
-        takeaways: output.takeaways,
-      },
+        takeaways: output.takeaways
+      }
     };
-  },
+  }
 } );
 
 // --- Step 4: Render HTML digest ---
@@ -189,11 +189,11 @@ export const renderHtml = step( {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
-        day: 'numeric',
-      } ),
+        day: 'numeric'
+      } )
     } );
     return { html };
-  },
+  }
 } );
 
 // --- Step 5: Publish to Beehiiv ---
@@ -206,5 +206,5 @@ export const publishToBeehiiv = step( {
   fn: async ( { html, title } ) => {
     const postId = await BeehiivClient.createPost( { title, html } );
     return { postId };
-  },
+  }
 } );
