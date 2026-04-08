@@ -6,7 +6,9 @@
       "Bash(npm run dev)",
       "Bash(npm run output:*)",
       "Skills(output*)",
-      "Skills(flow*)"
+      "Skills(flow*)",
+      "Skill(outputai:output-meta-project-context)",
+      "Skill(outputai:output-meta-project-context:*)"
     ]
   },
   "enabledPlugins": {

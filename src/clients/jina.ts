@@ -1,30 +1,20 @@
 import { httpClient } from '@outputai/http';
 
-export interface JinaReaderResponse {
-  code: number;
-  status: number;
-  data: {
-    title: string;
-    description: string;
-    url: string;
-    content: string;
-    usage: { tokens: number };
-  };
-}
-
-const jinaClient = httpClient( {
+const client = httpClient( {
   prefixUrl: 'https://r.jina.ai',
-  timeout: 30000
+  timeout: 30_000,
+  retry: { limit: 2 },
+  headers: {
+    'Accept': 'application/json',
+    'X-Return-Format': 'markdown',
+  },
 } );
 
-export async function fetchBlogContent( url: string ): Promise<JinaReaderResponse> {
-  const response = await jinaClient.post( '', {
-    json: { url },
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      'X-Return-Format': 'markdown'
-    }
-  } );
-  return response.json() as Promise<JinaReaderResponse>;
-}
+export const JinaClient = {
+
+  /** Fetch the readable content of a URL via Jina Reader. Returns markdown. */
+  async read( url: string ): Promise<string> {
+    const response = await client.get( url ).json<{ data: { content: string } }>();
+    return response.data.content;
+  },
+};
