@@ -14,10 +14,14 @@ build/
 .env.local
 .env.*.local
 
-# Encrypted credentials keys (never commit)
+# Encrypted credentials (never commit)
 **/config/credentials.key
+**/config/credentials.yml.enc
 **/config/credentials/*.key
 **/src/workflows/*/credentials.key
+
+# Output.ai local state
+.outputai/
 
 # TypeScript
 *.tsbuildinfo
