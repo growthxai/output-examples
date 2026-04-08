@@ -1,6 +1,6 @@
 import { step } from '@outputai/core';
 import { generateText, Output } from '@outputai/llm';
-import { fetchBlogContent } from '../../clients/jina.js';
+import { JinaClient } from '../../clients/jina.js';
 import { fetchContentInputSchema, urlContentSchema, summarizeContentInputSchema, summarySchema } from './types.js';
 
 export const fetchContent = step( {
@@ -9,7 +9,7 @@ export const fetchContent = step( {
   inputSchema: fetchContentInputSchema,
   outputSchema: urlContentSchema,
   fn: async ( { url } ) => {
-    const response = await fetchBlogContent( url );
+    const response = await JinaClient.read( url );
     return {
       title: response.data.title,
       url: response.data.url,

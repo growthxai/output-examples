@@ -1,6 +1,6 @@
 import { step, z, FatalError } from '@outputai/core';
 import { generateText, Output } from '@outputai/llm';
-import { fetchBlogContent } from '../../clients/jina.js';
+import { JinaClient } from '../../clients/jina.js';
 import { matchPerson } from '../../shared/clients/apollo.js';
 import { callInsightsSchema, companyContextSchema, followUpEmailSchema, prospectEnrichmentSchema } from './types.js';
 
@@ -64,7 +64,7 @@ export const enrichCompanyContext = step( {
   } ),
   outputSchema: companyContextSchema,
   fn: async ( { companyUrl } ) => {
-    const response = await fetchBlogContent( companyUrl );
+    const response = await JinaClient.read( companyUrl );
 
     const content = response.data.content;
     const title = response.data.title;

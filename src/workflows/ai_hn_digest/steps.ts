@@ -1,8 +1,8 @@
 import { step, z, FatalError } from '@outputai/core';
 import { generateText, Output } from '@outputai/llm';
-import { HnClient } from '../../shared/clients/hn.js';
-import { JinaClient } from '../../shared/clients/jina.js';
-import { BeehiivClient } from '../../shared/clients/beehiiv.js';
+import { HnClient } from '../../clients/hn.js';
+import { JinaClient } from '../../clients/jina.js';
+import { BeehiivClient } from '../../clients/beehiiv.js';
 import { renderDigestHtml } from '../../shared/utils/html_renderer.js';
 import {
   FetchTopStoriesInputSchema,
@@ -38,7 +38,7 @@ export const fetchTopStories = step( {
     for ( let i = 0; i < ids.length; i += CHUNK_SIZE ) {
       const chunk = ids.slice( i, i + CHUNK_SIZE );
       const items = await Promise.all(
-        chunk.map( ( id ) => HnClient.getItem( id ) )
+        chunk.map( ( id: number ) => HnClient.getItem( id ) )
       );
 
       for ( const item of items ) {
@@ -127,7 +127,8 @@ export const fetchAndAnalyzeArticle = step( {
   fn: async ( { profile, story } ) => {
     let content: string;
     try {
-      content = await JinaClient.read( story.url );
+      const response = await JinaClient.read( story.url );
+      content = response.data.content;
     } catch {
       content = `[Article content unavailable. Title: ${ story.title }]`;
     }

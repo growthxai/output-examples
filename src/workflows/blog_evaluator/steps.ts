@@ -1,5 +1,5 @@
 import { step, z } from '@outputai/core';
-import { fetchBlogContent } from '../../clients/jina.js';
+import { JinaClient } from '../../clients/jina.js';
 
 const blogContentSchema = z.object( {
   title: z.string(),
@@ -16,7 +16,7 @@ export const fetchContent = step( {
   } ),
   outputSchema: blogContentSchema,
   fn: async ( { url } ) => {
-    const response = await fetchBlogContent( url );
+    const response = await JinaClient.read( url );
     return {
       title: response.data.title,
       url: response.data.url,

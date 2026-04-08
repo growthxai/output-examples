@@ -1,7 +1,7 @@
 import { step, z } from '@outputai/core';
 import { generateText, Output } from '@outputai/llm';
 import { matchPerson } from '../../shared/clients/apollo.js';
-import { fetchBlogContent } from '../../clients/jina.js';
+import { JinaClient } from '../../clients/jina.js';
 import { personProfileSchema, companyContextSchema, personaClassificationSchema, icebreakerSchema } from './types.js';
 
 export const enrichPerson = step( {
@@ -52,7 +52,7 @@ export const scrapeCompanyWebsite = step( {
   } ),
   outputSchema: companyContextSchema,
   fn: async ( { websiteUrl } ) => {
-    const response = await fetchBlogContent( websiteUrl );
+    const response = await JinaClient.read( websiteUrl );
     return {
       websiteContent: response.data.content.slice( 0, 5000 ),
       websiteUrl
