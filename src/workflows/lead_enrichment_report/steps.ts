@@ -51,8 +51,8 @@ export const enrichPerson = step( {
     const org = p.organization;
 
     return {
-      firstName: p.first_name,
-      lastName: p.last_name,
+      firstName: p.first_name ?? '',
+      lastName: p.last_name ?? '',
       title: p.title ?? undefined,
       email: p.email ?? undefined,
       linkedinUrl: p.linkedin_url ?? undefined,
