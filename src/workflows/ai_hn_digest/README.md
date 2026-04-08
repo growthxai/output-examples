@@ -78,8 +78,8 @@ workflow.ts
 
 ## Prerequisites
 
-- An `ANTHROPIC_API_KEY` configured in credentials (used by `claude-haiku-4-5` for scoring and `claude-sonnet-4-6` for analysis)
-- A `beehiiv.api_key` configured in credentials (used to publish the digest as a draft newsletter post)
+- `anthropic.api_key` in encrypted credentials, wired via `.env` as `ANTHROPIC_API_KEY=credential:anthropic.api_key` (used by `claude-haiku-4-5` for scoring and `claude-sonnet-4-6` for analysis)
+- `beehiiv.api_key` in encrypted credentials (used to publish the digest as a draft newsletter post)
 
 ## Usage
 
@@ -90,8 +90,8 @@ workflow.ts
 npx output dev
 
 # Run with a scenario
-npx output workflow run ai_hn_digest --scenario default
-npx output workflow run ai_hn_digest --scenario growthx
+npx output workflow run ai_hn_digest default
+npx output workflow run ai_hn_digest growthx
 ```
 
 ### Run with custom input
