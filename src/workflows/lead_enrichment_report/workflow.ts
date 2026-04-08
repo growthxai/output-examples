@@ -7,22 +7,17 @@ export default workflow( {
   description: 'Enriches a lead with professional profile, company context, persona classification, and personalized icebreakers',
   inputSchema: workflowInputSchema,
   outputSchema: workflowOutputSchema,
-  fn: async ( input ) => {
+  fn: async input => {
     const person = await enrichPerson( {
       email: input.email,
       linkedinUrl: input.linkedinUrl
     } );
 
-    let companyContext;
-    if ( person.organizationWebsite ) {
-      try {
-        companyContext = await scrapeCompanyWebsite( {
-          websiteUrl: person.organizationWebsite
-        } );
-      } catch {
-        // Non-fatal: continue without company website context
-      }
-    }
+    const companyContext = person.organizationWebsite ?
+      await scrapeCompanyWebsite( {
+        websiteUrl: person.organizationWebsite
+      } ).catch( () => undefined as undefined ) :
+      undefined;
 
     const persona = await classifyPersona( {
       person,

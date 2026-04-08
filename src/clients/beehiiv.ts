@@ -1,4 +1,3 @@
-import { FatalError } from '@outputai/core';
 import { httpClient } from '@outputai/http';
 import { credentials } from '@outputai/credentials';
 
@@ -11,8 +10,8 @@ function getClient() {
     timeout: 30_000,
     retry: { limit: 2 },
     headers: {
-      Authorization: `Bearer ${ apiKey }`,
-    },
+      Authorization: `Bearer ${ apiKey }`
+    }
   } );
 }
 
@@ -29,11 +28,11 @@ export const BeehiivClient = {
           subtitle: '',
           status: 'draft',
           blocks: [
-            { type: 'html', html: params.html },
-          ],
-        },
+            { type: 'html', html: params.html }
+          ]
+        }
       }
     ).json<{ data: { id: string } }>();
     return response.data.id;
-  },
+  }
 };

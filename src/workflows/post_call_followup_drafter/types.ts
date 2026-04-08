@@ -58,5 +58,33 @@ export type CallInsights = z.infer<typeof callInsightsSchema>;
 export type CompanyContext = z.infer<typeof companyContextSchema>;
 export type ProspectEnrichment = z.infer<typeof prospectEnrichmentSchema>;
 export type FollowUpEmail = z.infer<typeof followUpEmailSchema>;
+// --- Step schemas ---
+
+export const extractCallInsightsInputSchema = z.object( {
+  transcript: z.string()
+} );
+
+export const enrichProspectInputSchema = z.object( {
+  email: z.string().email()
+} );
+
+export const enrichCompanyContextInputSchema = z.object( {
+  companyUrl: z.string().url()
+} );
+
+export const draftFollowUpEmailInputSchema = z.object( {
+  prospectName: z.string(),
+  prospectTitle: z.string().optional(),
+  companyName: z.string(),
+  painPoints: z.array( z.string() ),
+  actionItems: z.array( actionItemSchema ),
+  keyTopics: z.array( z.string() ),
+  nextSteps: z.string().optional(),
+  tone: z.enum( [ 'formal', 'casual', 'technical' ] ),
+  companyContext: z.string().optional(),
+  enrichmentContext: z.string().optional(),
+  senderName: z.string().optional()
+} );
+
 export type WorkflowInput = z.infer<typeof workflowInputSchema>;
 export type WorkflowOutput = z.infer<typeof workflowOutputSchema>;

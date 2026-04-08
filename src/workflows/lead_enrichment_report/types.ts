@@ -4,7 +4,7 @@ export const workflowInputSchema = z.object( {
   email: z.string().email().optional().describe( 'Email address of the lead' ),
   linkedinUrl: z.string().url().optional().describe( 'LinkedIn profile URL of the lead' )
 } ).refine(
-  ( data ) => data.email || data.linkedinUrl,
+  data => data.email || data.linkedinUrl,
   { message: 'At least one of email or linkedinUrl must be provided' }
 );
 
@@ -51,6 +51,32 @@ export const workflowOutputSchema = z.object( {
   person: personProfileSchema,
   companyContext: companyContextSchema.optional(),
   persona: personaClassificationSchema,
+  icebreakers: z.array( icebreakerSchema )
+} );
+
+// --- Step schemas ---
+
+export const enrichPersonInputSchema = z.object( {
+  email: z.string().email().optional(),
+  linkedinUrl: z.string().url().optional()
+} );
+
+export const scrapeCompanyWebsiteInputSchema = z.object( {
+  websiteUrl: z.string().url()
+} );
+
+export const classifyPersonaInputSchema = z.object( {
+  person: personProfileSchema,
+  companyContext: z.string().optional()
+} );
+
+export const generateIcebreakersInputSchema = z.object( {
+  person: personProfileSchema,
+  persona: personaClassificationSchema,
+  companyContext: z.string().optional()
+} );
+
+export const generateIcebreakersOutputSchema = z.object( {
   icebreakers: z.array( icebreakerSchema )
 } );
 

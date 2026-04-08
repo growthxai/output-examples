@@ -7,44 +7,49 @@ export default workflow( {
   description: 'Extracts insights from a sales call transcript and drafts a personalized follow-up email',
   inputSchema: workflowInputSchema,
   outputSchema: workflowOutputSchema,
-  fn: async ( input ) => {
+  fn: async input => {
     const insights = await extractCallInsights( { transcript: input.transcript } );
 
-    let prospectEnrichment;
-    if ( input.prospectEmail ) {
-      try {
-        prospectEnrichment = await enrichProspect( { email: input.prospectEmail } );
-      } catch {
-        // Apollo enrichment is optional — proceed without it
-      }
-    }
+    const prospectEnrichment = input.prospectEmail ?
+      await enrichProspect( { email: input.prospectEmail } )
+        .catch( () => undefined as undefined ) :
+      undefined;
 
-    const enrichmentUrl = input.companyUrl
-      || prospectEnrichment?.organizationWebsite
-      || insights.companyUrl;
-    let companyContext: string | undefined;
+    const enrichmentUrl = input.companyUrl ||
+      prospectEnrichment?.organizationWebsite ||
+      insights.companyUrl;
 
-    if ( enrichmentUrl ) {
-      try {
-        const context = await enrichCompanyContext( { companyUrl: enrichmentUrl } );
-        const parts = [ context.description ];
-        if ( context.industry ) parts.push( `Industry: ${context.industry}` );
-        if ( context.products?.length ) parts.push( `Products/Services: ${context.products.join( ', ' )}` );
-        companyContext = parts.join( '\n' );
-      } catch {
-        // Company enrichment is optional — proceed without it
-      }
-    }
+    const companyContext: string | undefined = enrichmentUrl ?
+      await enrichCompanyContext( { companyUrl: enrichmentUrl } )
+        .then( context => {
+          const parts = [ context.description ];
+          if ( context.industry ) {
+            parts.push( `Industry: ${context.industry}` );
+          }
+          if ( context.products?.length ) {
+            parts.push( `Products/Services: ${context.products.join( ', ' )}` );
+          }
+          return parts.join( '\n' );
+        } )
+        .catch( () => undefined as undefined ) :
+      undefined;
 
-    let enrichmentContext: string | undefined;
-    if ( prospectEnrichment ) {
-      const parts: string[] = [];
-      if ( prospectEnrichment.title ) parts.push( `Title: ${prospectEnrichment.title}` );
-      if ( prospectEnrichment.linkedinUrl ) parts.push( `LinkedIn: ${prospectEnrichment.linkedinUrl}` );
-      if ( prospectEnrichment.organizationName ) parts.push( `Company: ${prospectEnrichment.organizationName}` );
-      if ( prospectEnrichment.organizationIndustry ) parts.push( `Industry: ${prospectEnrichment.organizationIndustry}` );
-      if ( parts.length ) enrichmentContext = parts.join( '\n' );
+    const enrichmentParts: string[] = [];
+    if ( prospectEnrichment?.title ) {
+      enrichmentParts.push( `Title: ${prospectEnrichment.title}` );
     }
+    if ( prospectEnrichment?.linkedinUrl ) {
+      enrichmentParts.push( `LinkedIn: ${prospectEnrichment.linkedinUrl}` );
+    }
+    if ( prospectEnrichment?.organizationName ) {
+      enrichmentParts.push( `Company: ${prospectEnrichment.organizationName}` );
+    }
+    if ( prospectEnrichment?.organizationIndustry ) {
+      enrichmentParts.push( `Industry: ${prospectEnrichment.organizationIndustry}` );
+    }
+    const enrichmentContext: string | undefined = enrichmentParts.length ?
+      enrichmentParts.join( '\n' ) :
+      undefined;
 
     const email = await draftFollowUpEmail( {
       prospectName: insights.prospectName,

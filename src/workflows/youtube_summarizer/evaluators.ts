@@ -1,7 +1,7 @@
-import { evaluator, EvaluationNumberResult, z } from '@outputai/core';
+import { evaluator, EvaluationNumberResult } from '@outputai/core';
 import type { EvaluationResultArgs } from '@outputai/core';
 import { generateText, Output } from '@outputai/llm';
-import { keyMomentSchema, evaluateSummaryQualityInputSchema } from './types.js';
+import { evaluateSummaryQualityInputSchema } from './types.js';
 
 export const evaluateSummaryQuality = evaluator( {
   name: 'evaluate_summary_quality',

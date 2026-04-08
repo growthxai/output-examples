@@ -1,27 +1,19 @@
-import { step, z } from '@outputai/core';
-import { fetchBlogContent } from '../../clients/jina.js';
-
-const blogContentSchema = z.object( {
-  title: z.string(),
-  url: z.string(),
-  content: z.string(),
-  tokenCount: z.number()
-} );
+import { step } from '@outputai/core';
+import { JinaClient } from '../../clients/jina.js';
+import { workflowInputSchema, blogContentSchema } from './types.js';
 
 export const fetchContent = step( {
   name: 'fetch_blog_content',
   description: 'Fetch blog content from URL using Jina Reader API',
-  inputSchema: z.object( {
-    url: z.string().url()
-  } ),
+  inputSchema: workflowInputSchema,
   outputSchema: blogContentSchema,
   fn: async ( { url } ) => {
-    const response = await fetchBlogContent( url );
+    const result = await JinaClient.readDetailed( url );
     return {
-      title: response.data.title,
-      url: response.data.url,
-      content: response.data.content,
-      tokenCount: response.data.usage.tokens
+      title: result.title,
+      url: result.url,
+      content: result.content,
+      tokenCount: result.tokens
     };
   }
 } );

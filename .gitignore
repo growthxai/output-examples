@@ -14,9 +14,8 @@ build/
 .env.local
 .env.*.local
 
-# Encrypted credentials (never commit)
+# Credential decryption keys (never commit)
 **/config/credentials.key
-**/config/credentials.yml.enc
 **/config/credentials/*.key
 **/src/workflows/*/credentials.key
 
