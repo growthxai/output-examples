@@ -7,7 +7,7 @@ import {
   ClassifyMeetingOutputSchema,
   ProcessRecipeInputSchema,
   ProcessRecipeOutputSchema,
-  RECIPE_SCHEMAS,
+  RECIPE_SCHEMAS
 } from './types.js';
 
 export const extractNotes = step( {
@@ -47,7 +47,7 @@ export const classifyMeeting = step( {
 
     return {
       meetingType: output.meetingType,
-      recipes: output.recipes,
+      recipes: output.recipes
     };
   }
 } );
@@ -58,7 +58,7 @@ export const processRecipe = step( {
   inputSchema: ProcessRecipeInputSchema,
   outputSchema: ProcessRecipeOutputSchema,
   fn: async ( { notes, transcript, recipeName } ) => {
-    const schema = RECIPE_SCHEMAS[ recipeName ];
+    const schema = RECIPE_SCHEMAS[recipeName];
 
     const { output } = await generateText( {
       prompt: `${ recipeName }@v1`,
@@ -72,7 +72,7 @@ export const processRecipe = step( {
 
     return {
       recipeName,
-      content: output,
+      content: output
     };
   }
 } );

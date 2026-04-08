@@ -2,12 +2,12 @@ import { FatalError, ValidationError } from '@outputai/core';
 import { httpClient } from '@outputai/http';
 import { credentials } from '@outputai/credentials';
 
-let _client: ReturnType<typeof httpClient> | null = null;
+const clientHolder: { value: ReturnType<typeof httpClient> | null } = { value: null };
 
 function getClient(): ReturnType<typeof httpClient> {
-  if ( !_client ) {
+  if ( !clientHolder.value ) {
     const apiKey = credentials.require( 'apollo.api_key' ) as string;
-    _client = httpClient( {
+    clientHolder.value = httpClient( {
       prefixUrl: 'https://api.apollo.io/api/v1',
       headers: {
         'Content-Type': 'application/json',
@@ -17,7 +17,7 @@ function getClient(): ReturnType<typeof httpClient> {
       retry: { limit: 3, statusCodes: [ 408, 429, 500, 502, 503, 504 ] }
     } );
   }
-  return _client;
+  return clientHolder.value;
 }
 
 export interface ApolloPersonMatch {
@@ -41,8 +41,12 @@ export interface ApolloPersonMatch {
 
 export async function matchPerson( params: { email?: string; linkedinUrl?: string } ): Promise<ApolloPersonMatch> {
   const body: Record<string, string> = {};
-  if ( params.email ) body.email = params.email;
-  if ( params.linkedinUrl ) body.linkedin_url = params.linkedinUrl;
+  if ( params.email ) {
+    body.email = params.email;
+  }
+  if ( params.linkedinUrl ) {
+    body.linkedin_url = params.linkedinUrl;
+  }
 
   try {
     const response = await getClient().post( 'people/match', { json: body } );

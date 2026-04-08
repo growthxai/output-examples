@@ -1,8 +1,27 @@
 import { step, z } from '@outputai/core';
 import { generateText, Output } from '@outputai/llm';
 import { matchPerson } from '../../shared/clients/apollo.js';
-import { fetchBlogContent } from '../../clients/jina.js';
+import { JinaClient } from '../../clients/jina.js';
 import { personProfileSchema, companyContextSchema, personaClassificationSchema, icebreakerSchema } from './types.js';
+
+function formatEmployeeCount( count: number ): string {
+  if ( count < 10 ) {
+    return '1-10';
+  }
+  if ( count < 50 ) {
+    return '11-50';
+  }
+  if ( count < 200 ) {
+    return '51-200';
+  }
+  if ( count < 1000 ) {
+    return '201-1000';
+  }
+  if ( count < 5000 ) {
+    return '1001-5000';
+  }
+  return '5000+';
+}
 
 export const enrichPerson = step( {
   name: 'enrich_person',
@@ -12,7 +31,7 @@ export const enrichPerson = step( {
     linkedinUrl: z.string().url().optional()
   } ),
   outputSchema: personProfileSchema,
-  fn: async ( input ) => {
+  fn: async input => {
     const result = await matchPerson( {
       email: input.email,
       linkedinUrl: input.linkedinUrl
@@ -37,9 +56,9 @@ export const enrichPerson = step( {
       organizationName: org?.name ?? undefined,
       organizationWebsite: org?.website_url ?? undefined,
       organizationIndustry: org?.industry ?? undefined,
-      organizationSize: org?.estimated_num_employees
-        ? formatEmployeeCount( org.estimated_num_employees )
-        : undefined
+      organizationSize: org?.estimated_num_employees ?
+        formatEmployeeCount( org.estimated_num_employees ) :
+        undefined
     };
   }
 } );
@@ -52,9 +71,9 @@ export const scrapeCompanyWebsite = step( {
   } ),
   outputSchema: companyContextSchema,
   fn: async ( { websiteUrl } ) => {
-    const response = await fetchBlogContent( websiteUrl );
+    const result = await JinaClient.readDetailed( websiteUrl );
     return {
-      websiteContent: response.data.content.slice( 0, 5000 ),
+      websiteContent: result.content.slice( 0, 5000 ),
       websiteUrl
     };
   }
@@ -68,7 +87,7 @@ export const classifyPersona = step( {
     companyContext: z.string().optional()
   } ),
   outputSchema: personaClassificationSchema,
-  fn: async ( input ) => {
+  fn: async input => {
     const { output } = await generateText( {
       prompt: 'classify_persona@v1',
       variables: {
@@ -94,7 +113,7 @@ export const generateIcebreakers = step( {
     companyContext: z.string().optional()
   } ),
   outputSchema: z.object( { icebreakers: z.array( icebreakerSchema ) } ),
-  fn: async ( input ) => {
+  fn: async input => {
     const { output } = await generateText( {
       prompt: 'generate_icebreakers@v1',
       variables: {
@@ -117,12 +136,3 @@ export const generateIcebreakers = step( {
     return output;
   }
 } );
-
-function formatEmployeeCount( count: number ): string {
-  if ( count < 10 ) return '1-10';
-  if ( count < 50 ) return '11-50';
-  if ( count < 200 ) return '51-200';
-  if ( count < 1000 ) return '201-1000';
-  if ( count < 5000 ) return '1001-5000';
-  return '5000+';
-}

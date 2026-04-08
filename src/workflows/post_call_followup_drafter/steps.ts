@@ -1,6 +1,6 @@
 import { step, z, FatalError } from '@outputai/core';
 import { generateText, Output } from '@outputai/llm';
-import { fetchBlogContent } from '../../clients/jina.js';
+import { JinaClient } from '../../clients/jina.js';
 import { matchPerson } from '../../shared/clients/apollo.js';
 import { callInsightsSchema, companyContextSchema, followUpEmailSchema, prospectEnrichmentSchema } from './types.js';
 
@@ -64,10 +64,10 @@ export const enrichCompanyContext = step( {
   } ),
   outputSchema: companyContextSchema,
   fn: async ( { companyUrl } ) => {
-    const response = await fetchBlogContent( companyUrl );
+    const result = await JinaClient.readDetailed( companyUrl );
 
-    const content = response.data.content;
-    const title = response.data.title;
+    const content = result.content;
+    const title = result.title;
 
     const { output } = await generateText( {
       prompt: 'summarize_company@v1',
@@ -108,12 +108,11 @@ export const draftFollowUpEmail = step( {
     senderName: z.string().optional()
   } ),
   outputSchema: followUpEmailSchema,
-  fn: async ( input ) => {
+  fn: async input => {
     const painPointsText = input.painPoints.map( p => `- ${p}` ).join( '\n' );
     const actionItemsText = input.actionItems.map( item => {
-      let text = `- ${item.description} (Owner: ${item.owner})`;
-      if ( item.deadline ) text += ` — by ${item.deadline}`;
-      return text;
+      const base = `- ${item.description} (Owner: ${item.owner})`;
+      return item.deadline ? `${base} — by ${item.deadline}` : base;
     } ).join( '\n' );
     const keyTopicsText = input.keyTopics.map( t => `- ${t}` ).join( '\n' );
 

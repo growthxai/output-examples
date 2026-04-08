@@ -1,10 +1,9 @@
-import { FatalError } from '@outputai/core';
 import { httpClient } from '@outputai/http';
 
 const client = httpClient( {
   prefixUrl: 'https://hacker-news.firebaseio.com/v0',
   timeout: 15_000,
-  retry: { limit: 2 },
+  retry: { limit: 2 }
 } );
 
 export const HnClient = {
@@ -22,5 +21,5 @@ export const HnClient = {
     } catch {
       return null;
     }
-  },
+  }
 };

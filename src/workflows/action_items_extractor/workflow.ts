@@ -7,23 +7,24 @@ export default workflow( {
   description: 'Extracts action items, owners, deadlines, and context from call transcripts',
   inputSchema: workflowInputSchema,
   outputSchema: workflowOutputSchema,
-  fn: async ( input ) => {
+  fn: async input => {
     const extraction = await extractActionItems( { transcript: input.transcript } );
 
-    const hasEmails = extraction.participants.some( ( p ) => p.email );
-    let enrichedParticipantList = extraction.participants;
+    const hasEmails = extraction.participants.some( p => p.email );
 
-    if ( hasEmails ) {
-      try {
-        const enrichment = await enrichParticipants( { participants: extraction.participants } );
-        enrichedParticipantList = enrichment.participants;
-      } catch {
-        // Enrichment is optional — proceed with extracted participants
-      }
-    }
+    const enrichedParticipantList = hasEmails ?
+      await ( async () => {
+        try {
+          const enrichment = await enrichParticipants( { participants: extraction.participants } );
+          return enrichment.participants;
+        } catch {
+          return extraction.participants;
+        }
+      } )() :
+      extraction.participants;
 
-    const repItems = extraction.actionItems.filter( ( item ) => item.ownerRole === 'rep' );
-    const prospectItems = extraction.actionItems.filter( ( item ) => item.ownerRole === 'prospect' );
+    const repItems = extraction.actionItems.filter( item => item.ownerRole === 'rep' );
+    const prospectItems = extraction.actionItems.filter( item => item.ownerRole === 'prospect' );
 
     return {
       participants: enrichedParticipantList,

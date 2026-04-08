@@ -4,7 +4,7 @@ export const workflowInputSchema = z.object( {
   email: z.string().email().optional().describe( 'Email address of the lead' ),
   linkedinUrl: z.string().url().optional().describe( 'LinkedIn profile URL of the lead' )
 } ).refine(
-  ( data ) => data.email || data.linkedinUrl,
+  data => data.email || data.linkedinUrl,
   { message: 'At least one of email or linkedinUrl must be provided' }
 );
 
