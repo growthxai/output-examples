@@ -27,7 +27,7 @@ export const JinaClient = {
       title: response.data.title,
       url: response.data.url,
       content: response.data.content,
-      tokens: response.data.usage.tokens
+      tokens: response.data.usage?.tokens ?? 0
     };
   }
 };
