@@ -1,4 +1,4 @@
-import { workflow } from '@outputai/core';
+import { workflow, executeInParallel } from '@outputai/core';
 import { extractNotes, classifyMeeting, processRecipe } from './steps.js';
 import { inputSchema, outputSchema } from './types.js';
 
@@ -20,15 +20,20 @@ export default workflow( {
     const meetingType: string | undefined = classification?.meetingType;
 
     // Step 3 — Run each recipe in parallel
-    const recipeResults = await Promise.all(
-      recipes.map( recipeName =>
+    const results = await executeInParallel( {
+      jobs: recipes.map( recipeName => () =>
         processRecipe( {
           notes,
           transcript: input.transcript,
           recipeName
         } )
-      )
-    );
+      ),
+      concurrency: 5
+    } );
+
+    const recipeResults = results
+      .filter( r => r.ok )
+      .map( r => r.result );
 
     return {
       notes,

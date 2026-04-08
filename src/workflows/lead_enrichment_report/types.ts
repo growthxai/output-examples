@@ -54,6 +54,32 @@ export const workflowOutputSchema = z.object( {
   icebreakers: z.array( icebreakerSchema )
 } );
 
+// --- Step schemas ---
+
+export const enrichPersonInputSchema = z.object( {
+  email: z.string().email().optional(),
+  linkedinUrl: z.string().url().optional()
+} );
+
+export const scrapeCompanyWebsiteInputSchema = z.object( {
+  websiteUrl: z.string().url()
+} );
+
+export const classifyPersonaInputSchema = z.object( {
+  person: personProfileSchema,
+  companyContext: z.string().optional()
+} );
+
+export const generateIcebreakersInputSchema = z.object( {
+  person: personProfileSchema,
+  persona: personaClassificationSchema,
+  companyContext: z.string().optional()
+} );
+
+export const generateIcebreakersOutputSchema = z.object( {
+  icebreakers: z.array( icebreakerSchema )
+} );
+
 export type WorkflowInput = z.infer<typeof workflowInputSchema>;
 export type PersonProfile = z.infer<typeof personProfileSchema>;
 export type CompanyContext = z.infer<typeof companyContextSchema>;

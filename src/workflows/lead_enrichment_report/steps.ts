@@ -1,8 +1,17 @@
-import { step, z } from '@outputai/core';
+import { step } from '@outputai/core';
 import { generateText, Output } from '@outputai/llm';
 import { matchPerson } from '../../shared/clients/apollo.js';
 import { JinaClient } from '../../clients/jina.js';
-import { personProfileSchema, companyContextSchema, personaClassificationSchema, icebreakerSchema } from './types.js';
+import {
+  personProfileSchema,
+  companyContextSchema,
+  personaClassificationSchema,
+  enrichPersonInputSchema,
+  scrapeCompanyWebsiteInputSchema,
+  classifyPersonaInputSchema,
+  generateIcebreakersInputSchema,
+  generateIcebreakersOutputSchema
+} from './types.js';
 
 function formatEmployeeCount( count: number ): string {
   if ( count < 10 ) {
@@ -26,10 +35,7 @@ function formatEmployeeCount( count: number ): string {
 export const enrichPerson = step( {
   name: 'enrich_person',
   description: 'Enrich a lead using Apollo People Match API',
-  inputSchema: z.object( {
-    email: z.string().email().optional(),
-    linkedinUrl: z.string().url().optional()
-  } ),
+  inputSchema: enrichPersonInputSchema,
   outputSchema: personProfileSchema,
   fn: async input => {
     const result = await matchPerson( {
@@ -66,9 +72,7 @@ export const enrichPerson = step( {
 export const scrapeCompanyWebsite = step( {
   name: 'scrape_company_website',
   description: 'Scrape company website for additional context using Jina Reader',
-  inputSchema: z.object( {
-    websiteUrl: z.string().url()
-  } ),
+  inputSchema: scrapeCompanyWebsiteInputSchema,
   outputSchema: companyContextSchema,
   fn: async ( { websiteUrl } ) => {
     const result = await JinaClient.readDetailed( websiteUrl );
@@ -82,10 +86,7 @@ export const scrapeCompanyWebsite = step( {
 export const classifyPersona = step( {
   name: 'classify_persona',
   description: 'Classify the lead into a buyer persona using LLM',
-  inputSchema: z.object( {
-    person: personProfileSchema,
-    companyContext: z.string().optional()
-  } ),
+  inputSchema: classifyPersonaInputSchema,
   outputSchema: personaClassificationSchema,
   fn: async input => {
     const { output } = await generateText( {
@@ -107,12 +108,8 @@ export const classifyPersona = step( {
 export const generateIcebreakers = step( {
   name: 'generate_icebreakers',
   description: 'Generate personalized icebreakers for the lead',
-  inputSchema: z.object( {
-    person: personProfileSchema,
-    persona: personaClassificationSchema,
-    companyContext: z.string().optional()
-  } ),
-  outputSchema: z.object( { icebreakers: z.array( icebreakerSchema ) } ),
+  inputSchema: generateIcebreakersInputSchema,
+  outputSchema: generateIcebreakersOutputSchema,
   fn: async input => {
     const { output } = await generateText( {
       prompt: 'generate_icebreakers@v1',
@@ -129,7 +126,7 @@ export const generateIcebreakers = step( {
         companyContext: input.companyContext ?? 'No additional context available'
       },
       output: Output.object( {
-        schema: z.object( { icebreakers: z.array( icebreakerSchema ) } )
+        schema: generateIcebreakersOutputSchema
       } )
     } );
 

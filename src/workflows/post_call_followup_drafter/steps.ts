@@ -1,15 +1,22 @@
-import { step, z, FatalError } from '@outputai/core';
+import { step, FatalError } from '@outputai/core';
 import { generateText, Output } from '@outputai/llm';
 import { JinaClient } from '../../clients/jina.js';
 import { matchPerson } from '../../shared/clients/apollo.js';
-import { callInsightsSchema, companyContextSchema, followUpEmailSchema, prospectEnrichmentSchema } from './types.js';
+import {
+  callInsightsSchema,
+  companyContextSchema,
+  followUpEmailSchema,
+  prospectEnrichmentSchema,
+  extractCallInsightsInputSchema,
+  enrichProspectInputSchema,
+  enrichCompanyContextInputSchema,
+  draftFollowUpEmailInputSchema
+} from './types.js';
 
 export const extractCallInsights = step( {
   name: 'extract_call_insights',
   description: 'Extract action items, pain points, and key details from a sales call transcript',
-  inputSchema: z.object( {
-    transcript: z.string()
-  } ),
+  inputSchema: extractCallInsightsInputSchema,
   outputSchema: callInsightsSchema,
   fn: async ( { transcript } ) => {
     const { output } = await generateText( {
@@ -29,9 +36,7 @@ export const extractCallInsights = step( {
 export const enrichProspect = step( {
   name: 'enrich_prospect',
   description: 'Enrich prospect profile using Apollo People Match API',
-  inputSchema: z.object( {
-    email: z.string().email()
-  } ),
+  inputSchema: enrichProspectInputSchema,
   outputSchema: prospectEnrichmentSchema,
   fn: async ( { email } ) => {
     const result = await matchPerson( { email } );
@@ -59,9 +64,7 @@ export const enrichProspect = step( {
 export const enrichCompanyContext = step( {
   name: 'enrich_company_context',
   description: 'Scrape company website for context using Jina Reader',
-  inputSchema: z.object( {
-    companyUrl: z.string().url()
-  } ),
+  inputSchema: enrichCompanyContextInputSchema,
   outputSchema: companyContextSchema,
   fn: async ( { companyUrl } ) => {
     const result = await JinaClient.readDetailed( companyUrl );
@@ -90,23 +93,7 @@ export const enrichCompanyContext = step( {
 export const draftFollowUpEmail = step( {
   name: 'draft_follow_up_email',
   description: 'Draft a personalized follow-up email based on call insights and company context',
-  inputSchema: z.object( {
-    prospectName: z.string(),
-    prospectTitle: z.string().optional(),
-    companyName: z.string(),
-    painPoints: z.array( z.string() ),
-    actionItems: z.array( z.object( {
-      description: z.string(),
-      owner: z.enum( [ 'rep', 'prospect', 'both' ] ),
-      deadline: z.string().optional()
-    } ) ),
-    keyTopics: z.array( z.string() ),
-    nextSteps: z.string().optional(),
-    tone: z.enum( [ 'formal', 'casual', 'technical' ] ),
-    companyContext: z.string().optional(),
-    enrichmentContext: z.string().optional(),
-    senderName: z.string().optional()
-  } ),
+  inputSchema: draftFollowUpEmailInputSchema,
   outputSchema: followUpEmailSchema,
   fn: async input => {
     const painPointsText = input.painPoints.map( p => `- ${p}` ).join( '\n' );
