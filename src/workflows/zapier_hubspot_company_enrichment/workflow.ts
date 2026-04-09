@@ -13,14 +13,12 @@ export default workflow( {
       fetchHubspotIndustries()
     ] );
 
-    let hubspotIndustry: string | undefined;
-    if ( apolloData.industry ) {
-      const mapped = await mapHubspotIndustry( {
+    const hubspotIndustry = apolloData.industry ?
+      ( await mapHubspotIndustry( {
         industry: apolloData.industry,
         hubspotIndustries: industries
-      } );
-      hubspotIndustry = mapped.hubspotIndustry;
-    }
+      } ) ).hubspotIndustry :
+      undefined;
 
     const { hubspotCompanyId, action } = await upsertHubspotCompany( {
       ...apolloData,

@@ -2,7 +2,13 @@ import { step } from '@outputai/core';
 import { generateText, Output } from '@outputai/llm';
 import { enrichOrganization } from '../../shared/clients/apollo.js';
 import { createZapierClient } from '../../shared/clients/zapier.js';
-import { enrichCompanyInputSchema, apolloCompanySchema, fetchHubspotIndustriesOutputSchema, mapHubspotIndustryInputSchema, mapHubspotIndustryOutputSchema, hubspotUpsertInputSchema, hubspotUpsertOutputSchema, zapierHubspotResponseSchema } from './types.js';
+import {
+  enrichCompanyInputSchema, apolloCompanySchema,
+  fetchHubspotIndustriesOutputSchema,
+  mapHubspotIndustryInputSchema, mapHubspotIndustryOutputSchema,
+  hubspotUpsertInputSchema, hubspotUpsertOutputSchema,
+  zapierHubspotResponseSchema
+} from './types.js';
 
 const HUBSPOT_CONNECTION_ID = '63213154';
 
