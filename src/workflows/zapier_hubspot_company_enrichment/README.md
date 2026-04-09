@@ -4,14 +4,14 @@ Enriches a company profile using Apollo and upserts the result into HubSpot via 
 
 ## Overview
 
-This workflow takes a company name and website URL, enriches the company data through the Apollo organization API (extracting industry, employee count, funding, LinkedIn, and more), then creates or updates the corresponding company record in HubSpot using Zapier's `search_or_write` action.
+This workflow takes a website URL, enriches the company data through the Apollo organization API (extracting industry, employee count, funding, LinkedIn, and more), then creates or updates the corresponding company record in HubSpot using Zapier's `search_or_write` action.
 
 ### Orchestration Flow
 
 ```
 workflow.ts
 │
-├─ 1. enrichCompanyWithApollo({ companyName, website })   — step: Apollo REST API (I/O in activity)
+├─ 1. enrichCompanyWithApollo({ website })                — step: Apollo REST API (I/O in activity)
 └─ 2. upsertHubspotCompany(apolloData)                    — step: Zapier SDK → HubSpot (I/O in activity)
 ```
 
@@ -27,7 +27,7 @@ workflow.ts
 ### Shared Clients
 
 - `src/shared/clients/apollo.ts` — `enrichOrganization`: enriches company data by domain via the [Apollo API](https://apolloio.github.io/apollo-api-docs/)
-- `src/shared/clients/zapier.ts` — `createZapierClient`, `getConnectionId`: manages Zapier SDK connections and runs actions via the [Zapier SDK](https://www.npmjs.com/package/@zapier/zapier-sdk)
+- `src/shared/clients/zapier.ts` — `createZapierClient`: manages Zapier SDK connections and runs actions via the [Zapier SDK](https://www.npmjs.com/package/@zapier/zapier-sdk)
 
 ## Input Schema
 
@@ -40,8 +40,8 @@ workflow.ts
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `companyName` | `string` | The name of the company to enrich |
-| `website` | `string` (URL) | The company website URL (e.g. `https://acme.com`) |
+| `companyName` | `string` | The name of the company (included in output, not used for enrichment) |
+| `website` | `string` (URL) | The company website URL (e.g. `https://acme.com`) — used to extract domain for Apollo lookup |
 
 ## Output Schema
 
@@ -74,7 +74,7 @@ workflow.ts
 
 - `apollo.api_key` in encrypted credentials (used to enrich company data via Apollo REST API)
 - `zapier.client_id` and `zapier.client_secret` in encrypted credentials (used to authenticate the Zapier SDK)
-- An active HubSpot connection in Zapier (the workflow looks up the connection automatically)
+- An active HubSpot connection in Zapier (connection ID is configured in `steps.ts`)
 
 ## Usage
 
@@ -103,7 +103,7 @@ This workflow uses the [Zapier SDK](https://docs.zapier.com/sdk) — a TypeScrip
 | Concept | Description |
 |---------|-------------|
 | **App Key** | Identifier for an integrated app (e.g. `hubspot`, `slack`, `google_calendar`) |
-| **Connection** | A user-authenticated account linked to a specific app — retrieved via `findFirstConnection()` |
+| **Connection** | A user-authenticated account linked to a specific app — identified by connection ID |
 | **Action** | An operation on an app: `search` (find data), `write` (create/update), `read` (list), or `search_or_write` (upsert) |
 
 ### Authentication
@@ -122,34 +122,22 @@ In this project, credentials are stored encrypted and loaded via `@outputai/cred
 
 ### Running Actions
 
-To run an action you need: an **app key**, an **action type**, an **action key**, a **connection ID**, and the **inputs** the action expects.
+Actions are called using the chained `zapier.apps.<appKey>.<actionType>.<actionKey>()` pattern with a **connection ID** and **inputs**.
 
 ```typescript
-// 1. Find the user's active HubSpot connection
-const { data: connection } = await zapier.findFirstConnection({
-  appKey: 'hubspot',
-  owner: 'me',
-  isExpired: false
-});
+const zapier = createZapierClient();
 
-// 2. Run a search-or-write (upsert) action
-const { value: result } = await zapier
-  .runAction({
-    appKey: 'hubspot',
-    actionType: 'search_or_write',
-    actionKey: 'company_crmSearch',
-    connectionId: connection.id,
-    inputs: {
-      first_search_property_name: 'name',
-      first_search_property_value: 'Stripe',
-      name: 'Stripe',
-      domain: 'stripe.com',
-      // ...additional fields
-    }
-  })
-  .items()
-  [Symbol.asyncIterator]()
-  .next();
+// Run a search-or-write (upsert) action on HubSpot
+const { data: result } = await zapier.apps.hubspot.search_or_write.company_crmSearch( {
+  inputs: {
+    first_search_property_name: 'name',
+    first_search_property_value: 'Stripe',
+    name: 'Stripe',
+    domain: 'stripe.com',
+    // ...additional fields
+  },
+  connectionId: HUBSPOT_CONNECTION_ID
+} );
 ```
 
 This is the pattern used in `steps.ts` to upsert companies into HubSpot. The SDK takes care of authentication, retries, and API specifics behind the scenes.
