@@ -1,7 +1,9 @@
 import { step } from '@outputai/core';
 import { enrichOrganization } from '../../shared/clients/apollo.js';
-import { createZapierClient, getConnectionId } from '../../shared/clients/zapier.js';
-import { enrichCompanyInputSchema, apolloCompanySchema, hubspotUpsertOutputSchema } from './types.js';
+import { createZapierClient } from '../../shared/clients/zapier.js';
+import { enrichCompanyInputSchema, apolloCompanySchema, hubspotUpsertOutputSchema, zapierHubspotResponseSchema } from './types.js';
+
+const HUBSPOT_CONNECTION_ID = '63210713';
 
 function extractDomain( website: string ): string {
   const url = new URL( website );
@@ -16,13 +18,12 @@ function toHubspotIndustry( industry: string ): string {
     .replace( /^_|_$/g, '' );
 }
 
-
 export const enrichCompanyWithApollo = step( {
   name: 'enrich_company_with_apollo',
   description: 'Enriches company data using Apollo REST API directly',
   inputSchema: enrichCompanyInputSchema,
   outputSchema: apolloCompanySchema,
-  fn: async ( { companyName, website } ) => {
+  fn: async ( { website } ) => {
     const domain = extractDomain( website );
     const org = await enrichOrganization( domain );
 
@@ -54,9 +55,8 @@ export const upsertHubspotCompany = step( {
   description: 'Creates or updates a HubSpot company record using enriched Apollo data via Zapier SDK',
   inputSchema: apolloCompanySchema,
   outputSchema: hubspotUpsertOutputSchema,
-  fn: async ( input ) => {
-    const zapierClient = createZapierClient();
-    const HUBSPOT_CONNECTION_ID = await getConnectionId( 'hubspot' );
+  fn: async input => {
+    const zapier = createZapierClient();
 
     const domain = input.domain ?? extractDomain( input.website ?? '' );
 
@@ -72,20 +72,19 @@ export const upsertHubspotCompany = step( {
       numberofemployees: input.employeeCount ? String( input.employeeCount ) : '',
       description: input.description ?? '',
       linkedin_company_page: input.linkedinUrl ?? '',
-      total_money_raised: input.totalFunding ? String( input.totalFunding ) : '',
+      total_money_raised: input.totalFunding ? String( input.totalFunding ) : ''
     };
 
-    const { value: result } = await zapierClient
-      .runAction( { appKey: 'hubspot', actionType: 'search_or_write', actionKey: 'company_crmSearch', connectionId: HUBSPOT_CONNECTION_ID, inputs } )
-      .items()
-      [ Symbol.asyncIterator ]()
-      .next();
+    const { data: result } = await zapier.apps.hubspot.search_or_write.company_crmSearch( {
+      inputs,
+      connectionId: HUBSPOT_CONNECTION_ID
+    } );
 
-    if ( !result?.id ) {
-      throw new Error( 'HubSpot did not return a company ID' );
-    }
+    const [ record ] = zapierHubspotResponseSchema.parse( result );
 
-    const action = result.isNew === false ? 'updated' : 'created';
-    return { hubspotCompanyId: String( result.id ), action: action as 'created' | 'updated' };
+    return hubspotUpsertOutputSchema.parse( {
+      hubspotCompanyId: record.id,
+      action: record.isNew ? 'created' : 'updated'
+    } );
   }
 } );

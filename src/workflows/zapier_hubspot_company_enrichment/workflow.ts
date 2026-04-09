@@ -7,9 +7,8 @@ export default workflow( {
   description: 'Enriches a company profile using Apollo via REST API and upserts the result into HubSpot via Zapier SDK',
   inputSchema: workflowInputSchema,
   outputSchema: workflowOutputSchema,
-  fn: async ( input ) => {
+  fn: async input => {
     const apolloData = await enrichCompanyWithApollo( {
-      companyName: input.companyName,
       website: input.website
     } );
 

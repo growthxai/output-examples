@@ -6,9 +6,13 @@ export const workflowInputSchema = z.object( {
 } );
 
 export const enrichCompanyInputSchema = z.object( {
-  companyName: z.string(),
   website: z.string().url()
 } );
+
+export const zapierHubspotResponseSchema = z.array( z.object( {
+  id: z.coerce.string(),
+  isNew: z.boolean().optional().default( false )
+} ) ).min( 1, 'HubSpot upsert returned no company record' );
 
 export const apolloCompanySchema = z.object( {
   name: z.string(),
