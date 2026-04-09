@@ -20,6 +20,40 @@ function getClient(): ReturnType<typeof httpClient> {
   return clientHolder.value;
 }
 
+export interface ApolloOrganization {
+  name: string;
+  website_url?: string;
+  primary_domain?: string;
+  industry?: string;
+  estimated_num_employees?: number;
+  annual_revenue_printed?: string;
+  short_description?: string;
+  linkedin_url?: string;
+  city?: string;
+  country?: string;
+  keywords?: string[];
+  total_funding?: number;
+  latest_funding_round_date?: string;
+  latest_funding_stage?: string;
+}
+
+export async function enrichOrganization( domain: string ): Promise<ApolloOrganization | null> {
+  try {
+    const response = await getClient().post( 'organizations/enrich', { json: { domain } } );
+    const body = await response.json() as { organization: ApolloOrganization | null };
+    return body.organization ?? null;
+  } catch ( error: unknown ) {
+    const err = error as { status?: number; message?: string };
+    if ( err.status === 401 || err.status === 403 ) {
+      throw new FatalError( `Apollo auth failed: ${ err.message }` );
+    }
+    if ( err.status === 404 || err.status === 422 ) {
+      return null;
+    }
+    throw new ValidationError( `Apollo request failed: ${ err.message }` );
+  }
+}
+
 export interface ApolloPersonMatch {
   person: {
     first_name: string;
