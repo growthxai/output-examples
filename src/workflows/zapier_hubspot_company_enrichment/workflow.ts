@@ -1,5 +1,5 @@
 import { workflow } from '@outputai/core';
-import { enrichCompanyWithApollo, upsertHubspotCompany } from './steps.js';
+import { enrichCompanyWithApollo, fetchHubspotIndustries, mapHubspotIndustry, upsertHubspotCompany } from './steps.js';
 import { workflowInputSchema, workflowOutputSchema } from './types.js';
 
 export default workflow( {
@@ -8,11 +8,24 @@ export default workflow( {
   inputSchema: workflowInputSchema,
   outputSchema: workflowOutputSchema,
   fn: async input => {
-    const apolloData = await enrichCompanyWithApollo( {
-      website: input.website
-    } );
+    const [ apolloData, { industries } ] = await Promise.all( [
+      enrichCompanyWithApollo( { website: input.website } ),
+      fetchHubspotIndustries()
+    ] );
 
-    const { hubspotCompanyId, action } = await upsertHubspotCompany( apolloData );
+    let hubspotIndustry: string | undefined;
+    if ( apolloData.industry ) {
+      const mapped = await mapHubspotIndustry( {
+        industry: apolloData.industry,
+        hubspotIndustries: industries
+      } );
+      hubspotIndustry = mapped.hubspotIndustry;
+    }
+
+    const { hubspotCompanyId, action } = await upsertHubspotCompany( {
+      ...apolloData,
+      hubspotIndustry
+    } );
 
     return {
       companyName: apolloData.name,

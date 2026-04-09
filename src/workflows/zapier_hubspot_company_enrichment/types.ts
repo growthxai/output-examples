@@ -31,6 +31,29 @@ export const apolloCompanySchema = z.object( {
   fundingStage: z.string().optional().describe( 'Current funding stage (e.g. "Series A", "Seed", "IPO")' )
 } );
 
+export const hubspotIndustryChoiceSchema = z.object( {
+  key: z.string().optional(),
+  label: z.string().optional(),
+  value: z.string().optional()
+} );
+
+export const fetchHubspotIndustriesOutputSchema = z.object( {
+  industries: z.array( hubspotIndustryChoiceSchema ).describe( 'Available HubSpot industry field choices' )
+} );
+
+export const mapHubspotIndustryInputSchema = z.object( {
+  industry: z.string().describe( 'Raw industry string from Apollo enrichment' ),
+  hubspotIndustries: z.array( hubspotIndustryChoiceSchema ).describe( 'Available HubSpot industry choices' )
+} );
+
+export const mapHubspotIndustryOutputSchema = z.object( {
+  hubspotIndustry: z.string().describe( 'Mapped HubSpot industry enum value' )
+} );
+
+export const hubspotUpsertInputSchema = apolloCompanySchema.extend( {
+  hubspotIndustry: z.string().optional().describe( 'LLM-mapped HubSpot industry enum value' )
+} );
+
 export const hubspotUpsertOutputSchema = z.object( {
   hubspotCompanyId: z.string().describe( 'HubSpot company record ID' ),
   action: z.enum( [ 'created', 'updated' ] ).describe( 'Whether the HubSpot record was created or updated' )
