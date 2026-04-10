@@ -13,7 +13,9 @@ import {
 const HUBSPOT_CONNECTION_ID = '63213154';
 
 function extractDomain( website: string ): string {
-  if ( !website ) return '';
+  if ( !website ) {
+    return '';
+  }
   const url = new URL( website );
   return url.hostname.replace( /^www\./, '' );
 }
