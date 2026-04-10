@@ -1,7 +1,6 @@
 import { z } from '@outputai/core';
 
 export const workflowInputSchema = z.object( {
-  companyName: z.string().describe( 'The name of the company to enrich' ),
   website: z.string().url().describe( 'The company website URL (e.g. https://acme.com)' )
 } );
 

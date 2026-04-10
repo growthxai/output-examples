@@ -1,7 +1,7 @@
 import { step } from '@outputai/core';
 import { generateText, Output } from '@outputai/llm';
 import { enrichOrganization } from '../../shared/clients/apollo.js';
-import { createZapierClient } from '../../shared/clients/zapier.js';
+import { getZapierClient } from '../../shared/clients/zapier.js';
 import {
   enrichCompanyInputSchema, apolloCompanySchema,
   fetchHubspotIndustriesOutputSchema,
@@ -13,6 +13,7 @@ import {
 const HUBSPOT_CONNECTION_ID = '63213154';
 
 function extractDomain( website: string ): string {
+  if ( !website ) return '';
   const url = new URL( website );
   return url.hostname.replace( /^www\./, '' );
 }
@@ -22,7 +23,7 @@ export const fetchHubspotIndustries = step( {
   description: 'Fetches available HubSpot industry field choices via Zapier SDK',
   outputSchema: fetchHubspotIndustriesOutputSchema,
   fn: async () => {
-    const zapier = createZapierClient();
+    const zapier = getZapierClient();
 
     const industries: { key?: string; label?: string; value?: string }[] = [];
     for await ( const item of zapier.listInputFieldChoices( {
@@ -98,7 +99,7 @@ export const upsertHubspotCompany = step( {
   inputSchema: hubspotUpsertInputSchema,
   outputSchema: hubspotUpsertOutputSchema,
   fn: async input => {
-    const zapier = createZapierClient();
+    const zapier = getZapierClient();
 
     const domain = input.domain ?? extractDomain( input.website ?? '' );
 
@@ -124,9 +125,9 @@ export const upsertHubspotCompany = step( {
 
     const [ record ] = zapierHubspotResponseSchema.parse( result );
 
-    return hubspotUpsertOutputSchema.parse( {
+    return {
       hubspotCompanyId: record.id,
-      action: record.isNew ? 'created' : 'updated'
-    } );
+      action: record.isNew ? 'created' : 'updated' as const
+    };
   }
 } );

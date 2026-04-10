@@ -3,7 +3,7 @@ import { credentials } from '@outputai/credentials';
 
 const holder: { value: ReturnType<typeof createZapierSdk> | null } = { value: null };
 
-export function createZapierClient(): ReturnType<typeof createZapierSdk> {
+export function getZapierClient(): ReturnType<typeof createZapierSdk> {
   if ( !holder.value ) {
     const clientId = credentials.require( 'zapier.client_id' ) as string;
     const clientSecret = credentials.require( 'zapier.client_secret' ) as string;

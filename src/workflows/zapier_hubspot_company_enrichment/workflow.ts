@@ -3,7 +3,7 @@ import { enrichCompanyWithApollo, fetchHubspotIndustries, mapHubspotIndustry, up
 import { workflowInputSchema, workflowOutputSchema } from './types.js';
 
 export default workflow( {
-  name: 'zapier_company_enrichment',
+  name: 'zapier_hubspot_company_enrichment',
   description: 'Enriches a company profile using Apollo via REST API and upserts the result into HubSpot via Zapier SDK',
   inputSchema: workflowInputSchema,
   outputSchema: workflowOutputSchema,
